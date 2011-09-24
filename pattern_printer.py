@@ -14,15 +14,18 @@ class PatternPrinter:
         plt.figure()
         plt.hold(True)
         num_points = len(self.data[:,0])
-        angles = np.linspace(np.pi/4, 3*np.pi/4, num_points)
+#         angles = np.linspace(np.pi/4, 3*np.pi/4, num_points)
         for i in range(num_points):
-            plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2], angles[i])
+            plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
         plt.axis('equal')
-        plt.savefig('./pdf/'+os.path.splitext(os.path.split(self.filename)[1])[0]+'.pdf')
+        plt.savefig('./pdf/'+os.path.splitext(os.path.split(self.filename)[1])[0]+'.pdf',
+                        bbox_inches = 'tight')
         
-def plot_point(x, y, z, angle):
-    plt.plot([x, x + -z * np.cos(angle)], [y + z, y + z - z * np.sin(angle)], 'b*-')
+def plot_point(x, y, z):
+    angles = np.linspace(np.pi/4, 3*np.pi/4)
+    plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'b:')
     plt.plot(x, y + z, 'bo')
+    plt.plot([x, x - z * np.cos(np.pi/4)], [y + z, y + z - z * np.sin(np.pi/4)], 'r:')
     
 
 if __name__ == "__main__":
