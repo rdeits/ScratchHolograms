@@ -4,7 +4,7 @@
 <dict>
 	<key>EmbeddedEditorHidden:robindeits</key>
 	<false/>
-	<key>ExpandedEditorWidth:robindeits:displays([(0, 0), (1600, 1200)]:[(1600, 229), (1440, 900)])</key>
+	<key>ExpandedEditorWidth:robindeits:displays([(0, 0), (1440, 900)])</key>
 	<integer>732</integer>
 	<key>ExpandedItems:robindeits</key>
 	<array>
@@ -239,7 +239,7 @@
 	<false/>
 	<key>ViewSplitterPosition:robindeits</key>
 	<real>0.20607374608516693</real>
-	<key>WindowFrame:robindeits:displays([(0, 0), (1600, 1200)]:[(1600, 229), (1440, 900)])</key>
-	<string>rect(44,649,900,1571)</string>
+	<key>WindowFrame:robindeits:displays([(0, 0), (1440, 900)])</key>
+	<string>rect(44,268,900,1190)</string>
 </dict>
 </plist>
