@@ -6,6 +6,8 @@ import random
 import sys
 import os.path
 
+RESOLUTION = 100
+
 class PatternPrinter:
     def __init__(self, reader):
         self.filename = reader.filename
@@ -18,14 +20,17 @@ class PatternPrinter:
         for i in range(num_points):
             plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
         plt.axis('equal')
+        plt.minorticks_on()
+        plt.gca().grid(b=True, which='both')
+#         plt.show()
         plt.savefig('./pdf/'+os.path.splitext(os.path.split(self.filename)[1])[0]+'.pdf',
                         bbox_inches = 'tight')
         
 def plot_point(x, y, z):
     angles = np.linspace(np.pi/4, 3*np.pi/4)
-    plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'b:')
+    plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'b-')
     plt.plot(x, y + z, 'bo')
-    plt.plot([x, x - z * np.cos(np.pi/4)], [y + z, y + z - z * np.sin(np.pi/4)], 'r:')
+    plt.plot([x, x - z * np.cos(np.pi/4)], [y + z, y + z - z * np.sin(np.pi/4)], 'r-')
     
 
 if __name__ == "__main__":
