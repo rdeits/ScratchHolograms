@@ -21,16 +21,22 @@ class PatternPrinter:
             plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
         plt.axis('equal')
         plt.minorticks_on()
-        plt.gca().grid(b=True, which='both')
+        plt.gca().grid(b=True, which='major')
 #         plt.show()
         plt.savefig('./pdf/'+os.path.splitext(os.path.split(self.filename)[1])[0]+'.pdf',
                         bbox_inches = 'tight')
         
 def plot_point(x, y, z):
+    if z < 0:
+        style = 'b-'
+    else:
+        style = 'r-'    
     angles = np.linspace(np.pi/4, 3*np.pi/4)
-    plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'b-')
-    plt.plot(x, y + z, 'bo')
-    plt.plot([x, x - z * np.cos(np.pi/4)], [y + z, y + z - z * np.sin(np.pi/4)], 'r-')
+    plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), style,linewidth=.25)
+    plt.plot(x, y + z, style, markersize=3)
+    angle = np.pi/4
+    plt.plot([x, x - z * np.cos(angle)], [y + z, y + z - z * np.sin(angle)],
+            style, linewidth=.25)
     
 
 if __name__ == "__main__":
