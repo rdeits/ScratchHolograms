@@ -6,7 +6,7 @@ import random
 import sys
 import os.path
 
-RESOLUTION = 100
+RESOLUTION = 10
 
 class PatternPrinter:
     def __init__(self, reader):
@@ -25,12 +25,13 @@ class PatternPrinter:
         for i in range(num_points):
             too_close = False
             for j in range(i):
-                if plotted[j] and distance(self.data[i,:], self.data[j,:]) < min_dist:
+                if printed[j] and distance(self.data[i,:], self.data[j,:]) < min_dist:
                     too_close = True
                     break
             if too_close:
                 continue
             else:
+                printed[i] = 1
                 plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
         plt.axis('equal')
         plt.minorticks_on()
