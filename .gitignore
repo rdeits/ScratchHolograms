@@ -1,3 +1,5 @@
+*.bbprojectd
 models/
 pdf/
 *.pyc
+doc/
