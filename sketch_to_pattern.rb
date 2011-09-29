@@ -1,0 +1,1 @@
+/Library/Application Support/Google SketchUp 8/SketchUp/plugins/sketch_to_pattern.rb

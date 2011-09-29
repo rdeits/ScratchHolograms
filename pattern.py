@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
-from vertex_reader import VertexReader
+from vertex import VertexReader
 import random
 import sys
 import os.path
