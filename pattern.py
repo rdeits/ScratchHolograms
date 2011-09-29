@@ -6,6 +6,8 @@ import random
 import sys
 import os.path
 
+__author__ = "Robin Deits <robin.deits@gmail.com>"
+
 RESOLUTION = 10
 
 class PatternPrinter:

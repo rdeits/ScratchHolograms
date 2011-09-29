@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 RESOLUTION = 10
 
+__author__ = "Robin Deits <robin.deits@gmail.com>"
 
 class VertexReader:
     def __init__(self, filename):
