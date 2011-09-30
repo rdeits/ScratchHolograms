@@ -14,7 +14,7 @@ class VertexReader:
         self.f.seek(0)
         edge_str = [line[1:].split(';') for line in self.f if line[0] == 'e']
         edges = np.array([[float(i.strip()) for i in line] for line in edge_str])
-        print edges
+        # print edges
         x_range = np.max(vertices[:,0]) - np.min(vertices[:,0])
         y_range = np.max(vertices[:,1]) - np.min(vertices[:,1])
         overall_range = max(x_range, y_range)
@@ -26,10 +26,10 @@ class VertexReader:
             
 
 def interpolate(p0, p1, resolution):
-    print resolution
+    # print resolution
     num_points = max(2, int(np.sqrt(np.sum(np.power(p0 - p1, 2))) / resolution))
     interp_points = [np.linspace(p0[i], p1[i], num_points) for i in range(3)]
     result = np.array([[interp_points[j][i] for j in range(3)]\
             for i in range(num_points)])
-    print result
+    # print result
     return result
