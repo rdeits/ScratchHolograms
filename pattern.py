@@ -8,14 +8,14 @@ import os.path
 
 __author__ = "Robin Deits <robin.deits@gmail.com>"
 
-RESOLUTION = 1000
+RESOLUTION = 50
 
 class PatternPrinter:
     def __init__(self, reader):
         self.filename = reader.filename
         self.data = reader.to_array()
         # print self.data
-        plt.figure()
+        plt.figure(figsize=[6, 6])
         plt.hold(True)
         num_points = len(self.data[:,0])
         printed = np.zeros(num_points)
@@ -36,8 +36,9 @@ class PatternPrinter:
                 printed[i] = 1
                 plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
         plt.axis('equal')
-        plt.minorticks_on()
-        plt.gca().grid(b=True, which='major')
+        plt.tick_params(colors='w')
+        # plt.minorticks_on()
+        # plt.gca().grid(b=True, which='major')
 #         plt.show()
         plt.savefig('./pdf/'+os.path.splitext(os.path.split(self.filename)[1])[0]+'.pdf',
                         bbox_inches = 'tight')
@@ -47,14 +48,14 @@ def plot_point(x, y, z):
         style = 'b-'
     else:
         style = 'r-'    
-    # angles = np.linspace(np.pi/4, 3*np.pi/4)
-    # plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), style,linewidth=.25)
-    angle = np.pi/4
-    xs = [x,  x - z * np.cos(angle)]
-    ys = [y + z, y + z - z * np.sin(angle)]
-    plt.plot(xs, ys, style, linewidth=.25)
-    plt.plot(xs[0], ys[0], style, marker = 'o', markersize=2)
-    plt.plot(xs[1], ys[1], style, marker = '+', markersize=3)
+    angles = np.linspace(np.pi/4, 3*np.pi/4)
+    plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), style,
+            linewidth=.25)
+    plt.plot(x, y+z, style, marker='*', markersize=2)
+    plt.plot([x, x-z*np.cos(angles[0])], [y+z, y+z-z*np.sin(angles[0])],
+            style, linestyle=':', linewidth=.25)
+    plt.plot([x, x-z*np.cos(angles[-1])], [y+z, y+z-z*np.sin(angles[-1])],
+            style, linestyle=':', linewidth=.25)
 
 def distance(p0, p1):
     return np.sqrt(np.sum(np.power(p1 - p0, 2)))
