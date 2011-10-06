@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-RESOLUTION = 10
+RESOLUTION = 1
 
 __author__ = "Robin Deits <robin.deits@gmail.com>"
 
@@ -15,13 +15,14 @@ class VertexReader:
         edge_str = [line[1:].split(';') for line in self.f if line[0] == 'e']
         edges = np.array([[float(i.strip()) for i in line] for line in edge_str])
         # print edges
-        x_range = np.max(vertices[:,0]) - np.min(vertices[:,0])
-        y_range = np.max(vertices[:,1]) - np.min(vertices[:,1])
-        overall_range = max(x_range, y_range)
-        for i in range(len(edges[:,0])):
-            vertices = np.vstack((vertices, 
-                    interpolate(vertices[edges[i,0],:], vertices[edges[i,1],:],
-                        overall_range/RESOLUTION)))
+        if len(edges) > 0:
+            x_range = np.max(vertices[:,0]) - np.min(vertices[:,0])
+            y_range = np.max(vertices[:,1]) - np.min(vertices[:,1])
+            overall_range = max(x_range, y_range)
+            for i in range(len(edges[:,0])):
+                vertices = np.vstack((vertices, 
+                        interpolate(vertices[edges[i,0],:], vertices[edges[i,1],:],
+                            overall_range/RESOLUTION)))
         return vertices
             
 
