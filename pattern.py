@@ -23,11 +23,11 @@ class PatternPrinter:
                 - np.min(self.data[:,1])
                 + 2*z_max)
         self.overall_range = max(self.x_range, self.y_range)
+        plt.figure(figsize=[6, 6])
+        plt.hold(True)
 
     def print_pattern(self):
         # print self.data
-        plt.figure(figsize=[6, 6])
-        plt.hold(True)
         num_points = len(self.data[:,0])
         printed = np.zeros(num_points)
 #         angles = np.linspace(np.pi/4, 3*np.pi/4, num_points)
@@ -46,9 +46,6 @@ class PatternPrinter:
                 self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
         plt.axis('equal')
         plt.tick_params(colors='w')
-        # plt.minorticks_on()
-        # plt.gca().grid(b=True, which='major')
-#         plt.show()
         plt.savefig('./pdf/'+os.path.splitext(os.path.split(self.filename)[1])[0]+'.pdf',
                         bbox_inches = 'tight')
     def plot_point(self, x, y, z):
@@ -66,7 +63,7 @@ class PatternPrinter:
                 style, linestyle=':', linewidth=.25)
 
 class GridPatternPrinter(PatternPrinter):
-    def __init__(self, reader, num_bins = 100):
+    def __init__(self, reader, num_bins = 20):
         self.reader = reader
         self.filename = self.reader.filename
         self.data = self.reader.to_array()
@@ -81,37 +78,61 @@ class GridPatternPrinter(PatternPrinter):
         self.bin_width = self.overall_range / num_bins
         x_min = min(self.data[:,0]) - z_max
         x_max = max(self.data[:,0]) + z_max
-        y_min = min(self.data[:,1]) - z_max
-        y_max = max(self.data[:,1]) + z_max
-        self.x_bins = np.linspace(x_min, x_max, (x_max - x_min)/self.bin_width)
-        self.y_bins = np.linspace(y_min, y_max, (y_max - y_min)/self.bin_width)
-        print self.x_bins
-        print self.y_bins
-        print "bin width", self.bin_width
+        y_min = min(self.data[:,1]) - z_max/2
+        y_max = max(self.data[:,1]) + z_max/2
+        self.x_bins = np.arange(x_min, x_max + self.bin_width, self.bin_width)
+        self.y_bins = np.arange(y_min, y_max + self.bin_width, self.bin_width)
+        # print self.x_bins
+        # print self.y_bins
+        # print "bin width", self.bin_width
+
+    def print_pattern(self):
+        self.bin_angles = np.zeros((len(self.x_bins), len(self.y_bins))) + np.pi/2
+        plt.figure(figsize=[6, 6])
+        plt.hold(True)
+        # X, Y = np.meshgrid(self.x_bins, self.y_bins)
+        # plt.plot(X, Y, 'b.', markersize=4)
+        angles = np.linspace(0, 2*np.pi, 100)
+        r = self.bin_width / 2
+        for x in self.x_bins:
+            for y in self.y_bins:
+                plt.plot(x + r * np.cos(angles), y + r * np.sin(angles), 'k-', 
+                        linewidth=.5)
+        for i in range(len(self.data[:,0])):
+            self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
+        for i in range(len(self.x_bins)):
+            for j in range(len(self.y_bins)):
+                self.draw_line([self.x_bins[i], self.y_bins[j]], self.bin_width, 
+                            self.bin_angles[i][j])
+        plt.axis('equal')
+        plt.tick_params(colors='w')
+        plt.savefig('./pdf/'
+                +os.path.splitext(os.path.split(self.filename)[1])[0]+'_grid.pdf',
+                        bbox_inches = 'tight')
+
 
     def plot_point(self, x, y, z):
         print "printing:", x, y, z
+        angles = np.linspace(np.pi/6, 5*np.pi/6)
+        plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'r:')
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
                 if ((abs(z) - self.bin_width/2) 
-                        < distance([x, y], [self.x_bins[i], self.y_bins[j]])
-                        < (abs(z) + self.bin_width/2)):
-                    if ((z < 0 and self.y_bins[j] > y) 
-                            or (z > 0 and self.y_bins[j] < y)):
+                        <= distance([x, y+z], [self.x_bins[i], self.y_bins[j]])
+                        <= (abs(z) + self.bin_width/2)):
+                    if ((z <= 0 and self.y_bins[j] >= (y+z)) 
+                            or (z >= 0 and self.y_bins[j] <= (y+z))):
                         angle = np.arctan((x - self.x_bins[i]) / (self.y_bins[j] 
-                            - y))
-                        plt.plot([self.x_bins[i] - self.bin_width/2 * np.cos(angle),
-                                    self.x_bins[i]
-                                    + self.bin_width/2 * np.cos(angle)],
-                                [self.y_bins[j] - self.bin_width/2 * np.sin(angle),
-                                    self.y_bins[j] 
-                                    + self.bin_width/2 * np.sin(angle)], 
-                                'b-')
-                # else:
-                    # print "too far from", self.x_bins[i], self.y_bins[j],\
-                            # "dist", distance([x, y], [self.x_bins[i], self.y_bins[j]])
+                            - (y+z)))
+                        if abs(angle) < abs(self.bin_angles[i][j]):
+                            self.bin_angles[i][j] = angle
 
-
+    def draw_line(self, center, length, angle):
+        plt.plot([center[0] - length/2 * np.cos(angle), 
+            center[0] + length/2 * np.cos(angle)],
+            [center[1] - length/2 * np.sin(angle),
+                center[1] + length/2 * np.sin(angle)], 'k-')
+    
 
 def distance(p0, p1):
     return np.sqrt(np.sum(np.power(np.array(p1) - np.array(p0), 2)))
