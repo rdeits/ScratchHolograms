@@ -63,7 +63,7 @@ class PatternPrinter:
                 style, linestyle=':', linewidth=.25)
 
 class GridPatternPrinter(PatternPrinter):
-    def __init__(self, reader, num_bins = 20):
+    def __init__(self, reader, num_bins = 60):
         self.reader = reader
         self.filename = self.reader.filename
         self.data = self.reader.to_array()
@@ -82,24 +82,17 @@ class GridPatternPrinter(PatternPrinter):
         y_max = max(self.data[:,1]) + z_max/2
         self.x_bins = np.arange(x_min, x_max + self.bin_width, self.bin_width)
         self.y_bins = np.arange(y_min, y_max + self.bin_width, self.bin_width)
-        # print self.x_bins
-        # print self.y_bins
-        # print "bin width", self.bin_width
+        self.bin_angles = np.zeros((len(self.x_bins), len(self.y_bins))) + np.pi/2
+        for i in range(len(self.data[:,0])):
+            self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
 
     def print_pattern(self):
-        self.bin_angles = np.zeros((len(self.x_bins), len(self.y_bins))) + np.pi/2
         plt.figure(figsize=[6, 6])
         plt.hold(True)
-        # X, Y = np.meshgrid(self.x_bins, self.y_bins)
-        # plt.plot(X, Y, 'b.', markersize=4)
-        angles = np.linspace(0, 2*np.pi, 100)
         r = self.bin_width / 2
         for x in self.x_bins:
             for y in self.y_bins:
-                plt.plot(x + r * np.cos(angles), y + r * np.sin(angles), 'k-', 
-                        linewidth=.5)
-        for i in range(len(self.data[:,0])):
-            self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
+                self.draw_circle([x,y], r)
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
                 self.draw_line([self.x_bins[i], self.y_bins[j]], self.bin_width, 
@@ -113,8 +106,8 @@ class GridPatternPrinter(PatternPrinter):
 
     def plot_point(self, x, y, z):
         print "printing:", x, y, z
-        angles = np.linspace(np.pi/6, 5*np.pi/6)
-        plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'r:')
+        # angles = np.linspace(np.pi/6, 5*np.pi/6)
+        # plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'r:')
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
                 if ((abs(z) - self.bin_width/2) 
@@ -127,12 +120,36 @@ class GridPatternPrinter(PatternPrinter):
                         if abs(angle) < abs(self.bin_angles[i][j]):
                             self.bin_angles[i][j] = angle
 
-    def draw_line(self, center, length, angle):
-        plt.plot([center[0] - length/2 * np.cos(angle), 
-            center[0] + length/2 * np.cos(angle)],
-            [center[1] - length/2 * np.sin(angle),
-                center[1] + length/2 * np.sin(angle)], 'k-')
-    
+    def draw_line(self, center, length, angle, style='k-'):
+        plt.plot([center[0] - length/2 * np.cos(angle),
+                  center[0] + length/2 * np.cos(angle)],
+                 [center[1] - length/2 * np.sin(angle),
+                  center[1] + length/2 * np.sin(angle)], style)
+   
+    def draw_circle(self, center, r):
+        angles = np.linspace(0, 2*np.pi, 100)
+        plt.plot(center[0] + r * np.cos(angles), 
+                 center[1] + r * np.sin(angles), 'k-', linewidth=.5)
+
+    def draw_view(self, angle, name=''):
+        plt.figure(figsize=[6, 6])
+        plt.hold(True)
+        for i, x in enumerate(self.x_bins):
+            for j, y in enumerate(self.y_bins):
+                self.draw_line([x, y], self.bin_width, self.bin_angles[i][j],
+                               style = 'k:')
+                if abs(angle - self.bin_angles[i][j]) < 5*np.pi/180:
+                    self.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
+                    # plt.plot(x, y, 'ko', markerfacecolor='k', markersize=20)
+        plt.savefig('./pdf/'
+                    +os.path.splitext(os.path.split(self.filename)[1])[0]
+                    +'_grid'+name+'.pdf',
+                    bbox_inches = 'tight')
+
+    def draw_views(self, angle):
+        self.draw_view(angle, '_left')
+        self.draw_view(-angle, '_right')
+
 
 def distance(p0, p1):
     return np.sqrt(np.sum(np.power(np.array(p1) - np.array(p0), 2)))
@@ -142,5 +159,6 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     print filename
     pat = GridPatternPrinter(VertexReader(filename))
-    pat.print_pattern()
+    # pat.print_pattern()
+    pat.draw_views(15*np.pi/180)
     
