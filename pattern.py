@@ -63,7 +63,7 @@ class PatternPrinter:
                 style, linestyle=':', linewidth=.25)
 
 class GridPatternPrinter(PatternPrinter):
-    def __init__(self, reader, num_bins = 60):
+    def __init__(self, reader, num_bins = 40):
         self.reader = reader
         self.filename = self.reader.filename
         self.data = self.reader.to_array()
@@ -136,11 +136,15 @@ class GridPatternPrinter(PatternPrinter):
         plt.hold(True)
         for i, x in enumerate(self.x_bins):
             for j, y in enumerate(self.y_bins):
-                self.draw_line([x, y], self.bin_width, self.bin_angles[i][j],
-                               style = 'k:')
+                self.draw_circle([x,y], self.bin_width/2)
+                # plt.plot(x, y, 'k.', markersize=2)
+                # self.draw_line([x, y], self.bin_width, self.bin_angles[i][j],
+                #                style = 'k:')
                 if abs(angle - self.bin_angles[i][j]) < 5*np.pi/180:
                     self.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
                     # plt.plot(x, y, 'ko', markerfacecolor='k', markersize=20)
+        plt.axis('equal')
+        plt.tick_params(colors='w')
         plt.savefig('./pdf/'
                     +os.path.splitext(os.path.split(self.filename)[1])[0]
                     +'_grid'+name+'.pdf',
@@ -159,6 +163,6 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     print filename
     pat = GridPatternPrinter(VertexReader(filename))
-    # pat.print_pattern()
+    pat.print_pattern()
     pat.draw_views(15*np.pi/180)
     
