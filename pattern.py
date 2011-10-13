@@ -50,17 +50,39 @@ class PatternPrinter:
                         bbox_inches = 'tight')
     def plot_point(self, x, y, z):
         if z < 0:
-            style = 'b-'
+            style = 'k-'
         else:
-            style = 'r-'    
+            style = 'k-'    
         angles = np.linspace(np.pi/6, 5*np.pi/6)
         plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), style,
-                linewidth=.25)
-        plt.plot(x, y+z, style, marker='*', markersize=2)
-        plt.plot([x, x-z*np.cos(angles[0])], [y+z, y+z-z*np.sin(angles[0])],
-                style, linestyle=':', linewidth=.25)
-        plt.plot([x, x-z*np.cos(angles[-1])], [y+z, y+z-z*np.sin(angles[-1])],
-                style, linestyle=':', linewidth=.25)
+                linewidth=.5)
+        # plt.plot(x, y+z, style, marker='*', markersize=2)
+        # plt.plot([x, x-z*np.cos(angles[0])], [y+z, y+z-z*np.sin(angles[0])],
+        #         style, linestyle=':', linewidth=.25)
+        # plt.plot([x, x-z*np.cos(angles[-1])], [y+z, y+z-z*np.sin(angles[-1])],
+        #         style, linestyle=':', linewidth=.25)
+
+    def draw_view(self, angle, name=''):
+        num_points = len(self.data[:,0])
+        plt.figure(figsize=[6, 6])
+        plt.hold(True)
+        for i in range(num_points):
+            x = self.data[i,0]
+            y = self.data[i,1]
+            z = self.data[i,2]
+            self.plot_point(x, y, z)
+            plt.plot(x - z*np.cos(angle+np.pi/2), y + z - z*np.sin(angle+np.pi/2),
+                     'k*')
+        plt.axis('equal')
+        plt.tick_params(colors='w')
+        plt.savefig('./pdf/'
+                    +os.path.splitext(os.path.split(self.filename)[1])[0]
+                    +name+'.pdf',
+                    bbox_inches = 'tight')
+
+    def draw_views(self, angle):
+        self.draw_view(angle, '_left')
+        self.draw_view(-angle, '_right')
 
 class GridPatternPrinter(PatternPrinter):
     def __init__(self, reader, num_bins = 40):
@@ -90,9 +112,9 @@ class GridPatternPrinter(PatternPrinter):
         plt.figure(figsize=[6, 6])
         plt.hold(True)
         r = self.bin_width / 2
-        for x in self.x_bins:
-            for y in self.y_bins:
-                self.draw_circle([x,y], r)
+        # for x in self.x_bins:
+        #     for y in self.y_bins:
+        #         self.draw_circle([x,y], r)
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
                 self.draw_line([self.x_bins[i], self.y_bins[j]], self.bin_width, 
@@ -136,10 +158,10 @@ class GridPatternPrinter(PatternPrinter):
         plt.hold(True)
         for i, x in enumerate(self.x_bins):
             for j, y in enumerate(self.y_bins):
-                self.draw_circle([x,y], self.bin_width/2)
+                # self.draw_circle([x,y], self.bin_width/2)
                 # plt.plot(x, y, 'k.', markersize=2)
-                # self.draw_line([x, y], self.bin_width, self.bin_angles[i][j],
-                #                style = 'k:')
+                self.draw_line([x, y], self.bin_width, self.bin_angles[i][j],
+                               style = 'k:')
                 if abs(angle - self.bin_angles[i][j]) < 5*np.pi/180:
                     self.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
                     # plt.plot(x, y, 'ko', markerfacecolor='k', markersize=20)
@@ -150,9 +172,6 @@ class GridPatternPrinter(PatternPrinter):
                     +'_grid'+name+'.pdf',
                     bbox_inches = 'tight')
 
-    def draw_views(self, angle):
-        self.draw_view(angle, '_left')
-        self.draw_view(-angle, '_right')
 
 
 def distance(p0, p1):
@@ -162,7 +181,11 @@ def distance(p0, p1):
 if __name__ == "__main__":
     filename = sys.argv[1]
     print filename
-    pat = GridPatternPrinter(VertexReader(filename))
+    pat = PatternPrinter(VertexReader(filename))
     pat.print_pattern()
     pat.draw_views(15*np.pi/180)
+
+    gpat = GridPatternPrinter(VertexReader(filename))
+    gpat.print_pattern()
+    gpat.draw_views(15*np.pi/180)
     
