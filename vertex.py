@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-RESOLUTION = 1
+RESOLUTION = 7
 
 __author__ = "Robin Deits <robin.deits@gmail.com>"
 
