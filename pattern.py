@@ -8,14 +8,18 @@ import os.path
 
 __author__ = "Robin Deits <robin.deits@gmail.com>"
 
-RESOLUTION = 1000
+RESOLUTION = 60
 
 class PatternMaker:
-    def __init__(self, reader, printer):
+    def __init__(self, reader, printer, image_width_in = 4):
+        self.setup_common(reader, printer, image_width_in)
+
+    def setup_common(self, reader, printer, image_width_in):
         self.reader = reader
-        self.filename = self.reader.filename
-        self.printer = printer
         self.data = self.reader.to_array()
+        self.printer = printer
+        self.rescale(image_width_in)
+        self.filename = self.reader.filename
         z_max = np.max(np.abs(self.data[:,2]))
         self.x_range = (np.max(self.data[:,0]) 
                 - np.min(self.data[:,0]) 
@@ -24,6 +28,14 @@ class PatternMaker:
                 - np.min(self.data[:,1])
                 + 2*z_max)
         self.overall_range = max(self.x_range, self.y_range)
+
+
+    def rescale(self, image_width_in):
+        z_max = np.max(np.abs(self.data[:,2]))
+        x_range = (np.max(self.data[:,0]) 
+                - np.min(self.data[:,0]) 
+                + 2*z_max)
+        self.data *= image_width_in / x_range
 
     def print_pattern(self):
         num_points = len(self.data[:,0])
@@ -72,19 +84,12 @@ class PatternMaker:
         self.draw_view(-angle, '_right')
 
 class GridPatternMaker(PatternMaker):
-    def __init__(self, reader, printer, num_bins = 80):
-        self.reader = reader
-        self.printer = printer
-        self.filename = self.reader.filename
-        self.data = self.reader.to_array()
-        z_max = np.max(np.abs(self.data[:,2]))
-        self.x_range = (np.max(self.data[:,0]) 
-                - np.min(self.data[:,0]) 
-                + 2*z_max)
-        self.y_range = (np.max(self.data[:,1]) 
-                - np.min(self.data[:,1])
-                + 2*z_max)
-        self.overall_range = max(self.x_range, self.y_range)
+    def __init__(self, reader, printer, num_bins = 80, 
+                 image_width_in = 4,
+                 draw_verticals = True):
+        self.setup_common(reader, printer, image_width_in)
+
+        self.draw_verticals = draw_verticals
         self.bin_width = self.overall_range / num_bins
         x_min = min(self.data[:,0]) - z_max/2
         x_max = max(self.data[:,0]) + z_max/2
@@ -103,8 +108,11 @@ class GridPatternMaker(PatternMaker):
         #         self.printer.draw_circle([x,y], r)
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
-                self.printer.draw_line([self.x_bins[i], self.y_bins[j]], .8*self.bin_width, 
-                            self.bin_angles[i][j])
+                if (self.bin_angles[i][j] != np.pi/2 or self.draw_verticals):
+                    self.printer.draw_line([self.x_bins[i], 
+                                            self.y_bins[j]], 
+                                           .8*self.bin_width, 
+                                           self.bin_angles[i][j])
         self.printer.save('./pdf/'
                 +os.path.splitext(os.path.split(self.filename)[1])[0]+'_grid')
 
@@ -150,8 +158,8 @@ def distance(p0, p1):
 if __name__ == "__main__":
     filename = sys.argv[1]
     print filename
-    pat = PatternMaker(VertexReader(filename), PDFPrinter())
-    pat.print_pattern()
+    # pat = PatternMaker(VertexReader(filename), PDFPrinter())
+    # pat.print_pattern()
     # pat.draw_views(10*np.pi/180)
 
     # gpat = GridPatternMaker(VertexReader(filename), PDFPrinter(), num_bins = 20)
@@ -161,6 +169,7 @@ if __name__ == "__main__":
     dpat = PatternMaker(VertexReader(filename), DXFPrinter())
     dpat.print_pattern()
 
-    gdpat = GridPatternMaker(VertexReader(filename), DXFPrinter(), num_bins = 100)
-    gdpat.print_pattern()
+    # gdpat = GridPatternMaker(VertexReader(filename), DXFPrinter(), num_bins = 100,
+    #                          draw_verticals = False) 
+    # gdpat.print_pattern()
     
