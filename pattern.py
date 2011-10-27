@@ -1,20 +1,20 @@
 from __future__ import division
 import numpy as np
-import matplotlib.pyplot as plt
 from vertex import VertexReader
+from printer import PDFPrinter, DXFPrinter
 import random
 import sys
 import os.path
-import sdxf
 
 __author__ = "Robin Deits <robin.deits@gmail.com>"
 
 RESOLUTION = 1000
 
-class PatternPrinter:
-    def __init__(self, reader):
+class PatternMaker:
+    def __init__(self, reader, printer):
         self.reader = reader
         self.filename = self.reader.filename
+        self.printer = printer
         self.data = self.reader.to_array()
         z_max = np.max(np.abs(self.data[:,2]))
         self.x_range = (np.max(self.data[:,0]) 
@@ -26,7 +26,6 @@ class PatternPrinter:
         self.overall_range = max(self.x_range, self.y_range)
 
     def print_pattern(self):
-        self.setup_figure()
         num_points = len(self.data[:,0])
         printed = np.zeros(num_points)
         min_dist = self.overall_range / RESOLUTION
@@ -43,47 +42,16 @@ class PatternPrinter:
                 # print "printing"
                 printed[i] = 1
                 self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
-        self.save_figure('./pdf/'
+        self.printer.save('./pdf/'
                          +os.path.splitext(os.path.split(self.filename)[1])[0])
-
-    def setup_figure(self):
-        plt.figure(figsize=[6, 6])
-        plt.hold(True)
-
-    def save_figure(self, filename):
-        plt.axis('equal')
-        plt.tick_params(colors='w')
-        plt.savefig(filename+'.pdf', bbox_inches = 'tight')
 
     def plot_point(self, x, y, z):
         if z < 0:
             color = 'k'
         else:
             color = 'k'
-        self.draw_arc(center = [x, y+z], r = -z, color = color)
+        self.printer.draw_arc(center = [x, y+z], r = -z, color = color)
 
-    def draw_arc(self, center, r, angles = [np.pi/6, 5*np.pi/6], **kwargs):
-        angles = np.linspace(angles[0], angles[1])
-        plt.plot(center[0] + r * np.cos(angles), center[1] + r * np.sin(angles),
-                linewidth=.5,
-                **kwargs)
-        # plt.plot(x, y+z, style, marker='*', markersize=2)
-        # plt.plot([x, x-z*np.cos(angles[0])], [y+z, y+z-z*np.sin(angles[0])],
-        #         style, linestyle=':', linewidth=.25)
-        # plt.plot([x, x-z*np.cos(angles[-1])], [y+z, y+z-z*np.sin(angles[-1])],
-        #         style, linestyle=':', linewidth=.25)
-
-    def draw_line(self, center, length, angle, style='k-', **kwargs):
-        plt.plot([center[0] - length/2 * np.cos(angle),
-                  center[0] + length/2 * np.cos(angle)],
-                 [center[1] - length/2 * np.sin(angle),
-                  center[1] + length/2 * np.sin(angle)], style, **kwargs)
-   
-    def draw_circle(self, center, r):
-        angles = np.linspace(0, 2*np.pi, 100)
-        plt.plot(center[0] + r * np.cos(angles), 
-                 center[1] + r * np.sin(angles), 'k-', linewidth=.5)
-        
     def draw_view(self, angle, name=''):
         num_points = len(self.data[:,0])
         plt.figure(figsize=[6, 6])
@@ -95,7 +63,7 @@ class PatternPrinter:
             self.plot_point(x, y, z)
             plt.plot(x - z*np.cos(angle+np.pi/2), y + z - z*np.sin(angle+np.pi/2),
                      'k*')
-        self.save_figure('./pdf/'
+        self.printer.save('./pdf/'
                     +os.path.splitext(os.path.split(self.filename)[1])[0]
                     +name)
 
@@ -103,9 +71,10 @@ class PatternPrinter:
         self.draw_view(angle, '_left')
         self.draw_view(-angle, '_right')
 
-class GridPatternPrinter(PatternPrinter):
-    def __init__(self, reader, num_bins = 80):
+class GridPatternMaker(PatternMaker):
+    def __init__(self, reader, printer, num_bins = 80):
         self.reader = reader
+        self.printer = printer
         self.filename = self.reader.filename
         self.data = self.reader.to_array()
         z_max = np.max(np.abs(self.data[:,2]))
@@ -128,16 +97,15 @@ class GridPatternPrinter(PatternPrinter):
             self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
 
     def print_pattern(self):
-        self.setup_figure()
         r = self.bin_width / 2
         # for x in self.x_bins:
         #     for y in self.y_bins:
-        #         self.draw_circle([x,y], r)
+        #         self.printer.draw_circle([x,y], r)
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
-                self.draw_line([self.x_bins[i], self.y_bins[j]], .8*self.bin_width, 
+                self.printer.draw_line([self.x_bins[i], self.y_bins[j]], .8*self.bin_width, 
                             self.bin_angles[i][j])
-        self.save_figure('./pdf/'
+        self.printer.save('./pdf/'
                 +os.path.splitext(os.path.split(self.filename)[1])[0]+'_grid')
 
     def plot_point(self, x, y, z):
@@ -164,45 +132,16 @@ class GridPatternPrinter(PatternPrinter):
         plt.hold(True)
         for i, x in enumerate(self.x_bins):
             for j, y in enumerate(self.y_bins):
-                # self.draw_circle([x,y], self.bin_width/2)
+                # self.printer.draw_circle([x,y], self.bin_width/2)
                 # plt.plot(x, y, 'k.', markersize=2)
-                self.draw_line([x, y], .8*self.bin_width, self.bin_angles[i][j],
+                self.printer.draw_line([x, y], .8*self.bin_width, self.bin_angles[i][j],
                                style = 'k:', linewidth=.5)
                 if abs(angle - self.bin_angles[i][j]) < 5*np.pi/180:
-                    self.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
+                    self.printer.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
                     # plt.plot(x, y, 'ko', markerfacecolor='k', markersize=20)
-        self.save_figure('./pdf/'
+        self.printer.save('./pdf/'
                     +os.path.splitext(os.path.split(self.filename)[1])[0]
                     +'_grid'+name)
-
-class DXFPrinter(PatternPrinter):
-    def setup_figure(self):
-        self.dxf = sdxf.Drawing()
-
-    def save_figure(self, filename):
-        self.dxf.saveas(filename+'.dxf')
-
-    def draw_arc(self, center, r, angles = [np.pi/6, 5*np.pi/6], **kwargs):
-        self.dxf.append(sdxf.Arc(center = center + [0], radius = r,
-                                startAngle = angles[0]*180/np.pi,
-                                endAngle = angles[1]*180/np.pi,
-                                layer = "drawinglayer"))
-
-class GridDXFPrinter(GridPatternPrinter):
-    def setup_figure(self):
-        self.dxf = sdxf.Drawing()
-
-    def save_figure(self, filename):
-        self.dxf.saveas(filename+'.dxf')
-
-    def draw_line(self, center, length, angle, style='k-', **kwargs):
-        self.dxf.append(sdxf.Line(points=
-            [[center[0] - length/2 * np.cos(angle),
-              center[1] - length/2 * np.sin(angle)],
-             [center[0] + length/2 * np.cos(angle),
-              center[1] + length/2 * np.sin(angle)]]))
-    
-    
 
 def distance(p0, p1):
     return np.sqrt(np.sum(np.power(np.array(p1) - np.array(p0), 2)))
@@ -211,17 +150,17 @@ def distance(p0, p1):
 if __name__ == "__main__":
     filename = sys.argv[1]
     print filename
-    pat = PatternPrinter(VertexReader(filename))
+    pat = PatternMaker(VertexReader(filename), PDFPrinter())
     pat.print_pattern()
     # pat.draw_views(10*np.pi/180)
 
-    gpat = GridPatternPrinter(VertexReader(filename), num_bins = 20)
-    gpat.print_pattern()
+    # gpat = GridPatternMaker(VertexReader(filename), PDFPrinter(), num_bins = 20)
+    # gpat.print_pattern()
     # gpat.draw_views(10*np.pi/180)
 
-    dpat = DXFPrinter(VertexReader(filename))
+    dpat = PatternMaker(VertexReader(filename), DXFPrinter())
     dpat.print_pattern()
 
-    gdpat = GridDXFPrinter(VertexReader(filename), num_bins = 100)
+    gdpat = GridPatternMaker(VertexReader(filename), DXFPrinter(), num_bins = 100)
     gdpat.print_pattern()
     
