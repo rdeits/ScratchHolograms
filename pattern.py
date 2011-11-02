@@ -29,7 +29,6 @@ class PatternMaker:
                 + 2*z_max)
         self.overall_range = max(self.x_range, self.y_range)
 
-
     def rescale(self, image_width_in):
         z_max = np.max(np.abs(self.data[:,2]))
         x_range = (np.max(self.data[:,0]) 
@@ -80,6 +79,9 @@ class PatternMaker:
                     +name)
 
     def draw_views(self, angle):
+        if isinstance(self.printer, DXFPrinter):
+            print "DXFPrinter can't draw perspective views, aborting"
+            return
         self.draw_view(angle, '_left')
         self.draw_view(-angle, '_right')
 
@@ -118,8 +120,6 @@ class GridPatternMaker(PatternMaker):
 
     def plot_point(self, x, y, z):
         print "printing:", x, y, z
-        # angles = np.linspace(np.pi/6, 5*np.pi/6)
-        # plt.plot(x + -z * np.cos(angles), y + z - z * np.sin(angles), 'r:')
         for i in range(len(self.x_bins)):
             if (x - abs(z) - self.bin_width/2) <= self.x_bins[i] <=\
                (x + abs(z) + self.bin_width/2):
@@ -136,8 +136,7 @@ class GridPatternMaker(PatternMaker):
 
 
     def draw_view(self, angle, name=''):
-        plt.figure(figsize=[6, 6])
-        plt.hold(True)
+        self.printer.__init__()
         for i, x in enumerate(self.x_bins):
             for j, y in enumerate(self.y_bins):
                 # self.printer.draw_circle([x,y], self.bin_width/2)
