@@ -5,6 +5,7 @@ from printer import PDFPrinter, DXFPrinter
 import random
 import sys
 import os.path
+import csv
 
 __author__ = "Robin Deits <robin.deits@gmail.com>"
 
@@ -34,7 +35,7 @@ class PatternMaker:
         x_range = (np.max(self.data[:,0]) 
                 - np.min(self.data[:,0]) 
                 + 2*z_max)
-        self.data *= image_width_in / x_range
+        self.data[:,:3] *= image_width_in / x_range
 
     def print_pattern(self):
         num_points = len(self.data[:,0])
@@ -152,7 +153,32 @@ class GridPatternMaker(PatternMaker):
 
 def distance(p0, p1):
     return np.sqrt(np.sum(np.power(np.array(p1) - np.array(p0), 2)))
-    
+
+class SolidPatternMaker(PatternMaker):
+    def __init__(self, filename, printer, image_width_in = 4):
+        self.filename = filename
+        self.reader = csv.reader(open(filename, 'rb'))
+        self.printer = printer
+        self.data = np.array([[float(i) for i in row] for row in self.reader])
+        print self.data
+        print np.abs(self.data)
+        # self.rescale(image_width_in)
+
+    def print_pattern(self):
+        num_points = len(self.data[:,0])
+        for i in range(num_points):
+            self.plot_point(self.data[i,:])
+        self.printer.save('./pdf/'
+                          +os.path.splitext(os.path.split(self.filename)[1])[0])
+
+    def plot_point(self, point):
+        x = point[0]
+        y = point[1]
+        z = point[2]
+        angles = -np.array([point[3], point[4]]) - np.pi/2
+        self.printer.draw_arc([y,x + z], x, angles = angles)
+        
+
 
 if __name__ == "__main__":
     filename = sys.argv[1]
@@ -165,10 +191,13 @@ if __name__ == "__main__":
     # gpat.print_pattern()
     # gpat.draw_views(10*np.pi/180)
 
-    dpat = PatternMaker(VertexReader(filename), DXFPrinter())
-    dpat.print_pattern()
+    # dpat = PatternMaker(VertexReader(filename), DXFPrinter())
+    # dpat.print_pattern()
 
     # gdpat = GridPatternMaker(VertexReader(filename), DXFPrinter(), num_bins = 100,
     #                          draw_verticals = False) 
     # gdpat.print_pattern()
+
+    spat = SolidPatternMaker(filename, PDFPrinter())
+    spat.print_pattern()
     
