@@ -95,7 +95,7 @@ def ExportPattern()
 end
 
 def DumpPatternFile( filename )
-	file = File.new(filename, "w")
+	file = File.open(filename, mode="wb")
 	if not file
 	  	  UI.messagebox "Problem opening @file "+filename+" for writing", MB_OK, "Error"
 	  	  return
@@ -137,7 +137,7 @@ def DumpPatternFile( filename )
 			if item
 				coords = item[0]
 				puts "hit at", coords
-				file.write coords[0].to_s + ',' + coords[1].to_s + ',' + coords[2].to_s + ',' + (-view_angle + (j-1) * angle_step).to_s + "\n"
+				file.write "%.3f,%.3f,%.3f,%.3f\n" % [coords[0], coords[1], coords[2], (-view_angle + (j-1) * angle_step)]
 			end
 			ray_start = scan_xform * ray_start
 		end
