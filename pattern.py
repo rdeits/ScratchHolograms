@@ -175,8 +175,11 @@ class SolidPatternMaker(PatternMaker):
         x = point[0]
         y = point[1]
         z = point[2]
-        angles = -np.array([point[3], point[4]]) - np.pi/2
-        self.printer.draw_arc([y,x + z], x, angles = angles)
+        angle = point[3] + np.pi / 2
+        angle_delta = 2 * np.pi / 180
+        self.printer.draw_arc([y, z + x], -x,
+                              angles = [angle-angle_delta, 
+                                        angle+angle_delta])
         
 
 

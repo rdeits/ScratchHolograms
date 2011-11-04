@@ -100,22 +100,25 @@ def DumpPatternFile( filename )
 	  	  UI.messagebox "Problem opening @file "+filename+" for writing", MB_OK, "Error"
 	  	  return
 	end
-    view_angle = Math::PI/2
-    num_angle_steps = 20
-	num_z_steps = 5
-    angle_step = 2 * view_angle / (num_angle_steps - 1)
-    model = Sketchup.active_model
-    view = model.active_view
-    camera = view.camera
-    eye = camera.eye
+	angle_step_rad = 1 * Math::PI / 180
+	camera_angle_range = [-Math::PI/2, Math::PI/2]
+	sweep_angle_range = [0, Math::PI * 2]
+	num_camera_steps = (camera_angle_range[1] - camera_angle_range[0]) / angle_step_rad
+	num_sweep_steps = (sweep_angle_range[1] - sweep_angle_range[0]) / angle_step_rad
+	sweep_start = Geom::Vector3d.new(-1, 0, 0)
+
     rot_axis_vector = Geom::Vector3d.new(0, 0, 1)
     model_center = Geom::Point3d.new(0,0,0)
-    ray_init_xform = Geom::Transformation.rotation(model_center,
-                                                    rot_axis_vector,
-                                                    -view_angle)
-	scan_xform = Geom::Transformation.rotation(model_center,
-                                                  rot_axis_vector,
-                                                  angle_step)
+	camera_step_xform = Geom::Transformation.rotation(model_center,
+													  rot_axis_vector,
+													  angle_step_rad)
+	num_z_steps = 5
+    model = Sketchup.active_model
+    view = model.active_view
+    eye = view.camera.eye
+	camera_start = Geom::Transformation.rotation(model_center,
+												 rot_axis_vector,
+												 camera_angle_range[0]) * eye
 	scanner = ModelScanner.new()
 	zRange = scanner.getModelZRange( model )
 	# puts zRange
@@ -123,25 +126,33 @@ def DumpPatternFile( filename )
 	(1..num_z_steps).each do |i|
 		z = zRange[0] + (i-1) * z_step
 		z_vector = Geom::Vector3d.new(0, 0, z)
-		z_xform = Geom::Transformation.translation(z_vector )
+		z_xform = Geom::Transformation.translation(z_vector)
 		# puts "z=", z
-		ray_start = ray_init_xform * eye
-		(1..num_angle_steps).each do |j|
-			# puts "angle=", -view_angle + (j-1) * angle_step
-			# puts model_center
-			# puts ray_start
-			# puts model_center-ray_start
-			# puts Geom::Vector3d.new(model_center-ray_start)
-			item = model.raytest([z_xform * ray_start, 
-								 model_center-ray_start])
-			if item
-				coords = item[0]
-				puts "hit at", coords
-				file.write "%.3f,%.3f,%.3f,%.3f,%.3f\n" % [coords[0], coords[1], coords[2], (-view_angle + (j-1.5) * angle_step), (-view_angle + (j-0.5) * angle_step)]
+		camera = camera_start
+		(1..num_camera_steps).each do |j|
+			sweep_step_xform = Geom::Transformation.rotation(camera,
+															 rot_axis_vector,
+															 angle_step_rad)
+			sweep_vector = sweep_start
+			(1..num_sweep_steps).each do |k|
+				item = model.raytest([z_xform * camera, 
+					sweep_vector])
+				# puts camera
+				# puts sweep_vector
+				if item
+					coords = item[0]
+					# puts "hit at", coords
+					file.write "%.3f,%.3f,%.3f,%.3f\n" % [coords[0], 
+						coords[1],
+					   	coords[2], 
+						-(sweep_angle_range[0] + (k-1) * angle_step_rad)]
+				end
+				sweep_vector = sweep_step_xform * sweep_vector
 			end
-			ray_start = scan_xform * ray_start
+			camera = camera_step_xform * camera
 		end
 	end
+	puts "done"
 	file.close
 end
 
