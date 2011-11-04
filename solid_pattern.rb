@@ -84,9 +84,9 @@ def ExportPattern()
     proposal = File.basename( Sketchup.active_model.path )
     if proposal != ""
       proposal = proposal.split(".")[0]
-      proposal += ".pat"
+      proposal += ".pattern"
     else
-      proposal = "Untitled.pat"
+      proposal = "Untitled.pattern"
     end
 
     filename = UI.savepanel( "Export Pattern File", nil, proposal )
@@ -95,8 +95,13 @@ def ExportPattern()
 end
 
 def DumpPatternFile( filename )
+	file = File.new(filename, "w")
+	if not file
+	  	  UI.messagebox "Problem opening @file "+filename+" for writing", MB_OK, "Error"
+	  	  return
+	end
     view_angle = Math::PI/2
-    num_angle_steps = 5
+    num_angle_steps = 10
 	num_z_steps = 3
     angle_step = 2 * view_angle / (num_angle_steps - 1)
     model = Sketchup.active_model
@@ -113,29 +118,31 @@ def DumpPatternFile( filename )
                                                   angle_step)
 	scanner = ModelScanner.new()
 	zRange = scanner.getModelZRange( model )
-	puts zRange
+	# puts zRange
 	z_step = (zRange[1] - zRange[0]) / (num_z_steps-1)
 	(1..num_z_steps).each do |i|
 		z = zRange[0] + (i-1) * z_step
 		z_vector = Geom::Vector3d.new(0, 0, z)
 		z_xform = Geom::Transformation.translation(z_vector )
-		puts "z=", z
+		# puts "z=", z
 		ray_start = ray_init_xform * eye
 		(1..num_angle_steps).each do |j|
-			puts "angle=", -view_angle + (j-1) * angle_step
-			puts model_center
-			puts ray_start
-			puts model_center-ray_start
-			puts Geom::Vector3d.new(model_center-ray_start)
+			# puts "angle=", -view_angle + (j-1) * angle_step
+			# puts model_center
+			# puts ray_start
+			# puts model_center-ray_start
+			# puts Geom::Vector3d.new(model_center-ray_start)
 			item = model.raytest([z_xform * ray_start, 
 								 model_center-ray_start])
 			if item
 				coords = item[0]
 				puts "hit at", coords
+				file.write coords[0].to_s + ',' + coords[1].to_s + ',' + coords[2].to_s + ',' + (-view_angle + (j-1) * angle_step).to_s + "\n"
 			end
 			ray_start = scan_xform * ray_start
 		end
 	end
+	file.close
 end
 
 # Register within Sketchup
