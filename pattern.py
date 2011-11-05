@@ -220,5 +220,5 @@ if __name__ == "__main__":
 
     spat = SolidPatternMaker(filename, PDFPrinter())
     spat.print_pattern()
-    spat.draw_views(15)
+    spat.draw_views(25)
     
