@@ -77,7 +77,7 @@ end
 
 #--------------------------------------------------------------------------
 def collectEdges( entity, trans )
-  return if not entity.visible?
+  # return if not entity.visible?
   collectEdge( entity ) if entity.is_a? Sketchup::Edge
 end
 
@@ -102,7 +102,7 @@ end
 #--------------------------------------------------------------------------
 def dumpEntity( entity, trans )
 
-  return if not entity.visible?
+  # return if not entity.visible?
 
   #----------- GROUP -----------------
   if entity.is_a? Sketchup::Group

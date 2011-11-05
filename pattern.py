@@ -85,8 +85,8 @@ class PatternMaker:
         if isinstance(self.printer, DXFPrinter):
             print "DXFPrinter can't draw perspective views, aborting"
             return
-        self.draw_view(angle, '_left')
-        self.draw_view(-angle, '_right')
+        self.draw_view(angle, '_right')
+        self.draw_view(-angle, '_left')
 
 class GridPatternMaker(PatternMaker):
     def __init__(self, reader, printer, num_bins = 80, 
@@ -220,5 +220,7 @@ if __name__ == "__main__":
 
     spat = SolidPatternMaker(filename, PDFPrinter())
     spat.print_pattern()
-    spat.draw_views(25)
+    spat.draw_view(-45*np.pi/180, '_left')
+    spat.draw_view(-25*np.pi/180, '_middle')
+    spat.draw_view(-5*np.pi/180, '_right')
     
