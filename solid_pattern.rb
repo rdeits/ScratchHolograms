@@ -142,10 +142,11 @@ def DumpPatternFile( filename )
 				if item
 					coords = item[0]
 					# puts "hit at", coords
-					file.write "%.3f,%.3f,%.3f,%.3f\n" % [coords[0], 
+					file.write "%.3f,%.3f,%.3f,%.3f,%.3f\n" % [coords[0], 
 						coords[1],
 					   	coords[2], 
-						-(sweep_angle_range[0] + (k-1) * angle_step_rad)]
+						-(sweep_angle_range[0] + (k-1.5) * angle_step_rad),
+						-(sweep_angle_range[0] + (k-0.5) * angle_step_rad)]
 				end
 				sweep_vector = sweep_step_xform * sweep_vector
 			end
