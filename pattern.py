@@ -6,6 +6,7 @@ import random
 import sys
 import os.path
 import csv
+import matplotlib.pyplot as plt
 
 __author__ = "Robin Deits <robin.deits@gmail.com>"
 
@@ -80,6 +81,7 @@ class PatternMaker:
                     +name)
 
     def draw_views(self, angle):
+        angle = angle * np.pi / 180
         if isinstance(self.printer, DXFPrinter):
             print "DXFPrinter can't draw perspective views, aborting"
             return
@@ -177,11 +179,26 @@ class SolidPatternMaker(PatternMaker):
         z = point[2]
         angles = -np.array([point[3], point[4]]) + np.pi / 2
         self.printer.draw_arc([y, z + x], -x,
-                              angles = angles)
+                              angles = angles, color='k')
         # self.printer.draw_arc([y, z+x], -x,
         #                       angles = [angle - angle_delta, angle + angle_delta])
-        
 
+    def draw_view(self, angle, name=''):
+        num_points = len(self.data[:,0])
+        plt.figure(figsize=[6,6])
+        plt.hold(True)
+        for i in range(num_points):
+            x = self.data[i,0]
+            y = self.data[i,1]
+            z = self.data[i,2]
+            if self.data[i, 3] < angle < self.data[i,4]:
+                draw_angle = -angle + np.pi/2
+                plt.plot(y - x * np.cos(draw_angle),
+                         z + x - x * np.sin(draw_angle),
+                         'k*')
+        self.printer.save('./pdf/'
+                    +os.path.splitext(os.path.split(self.filename)[1])[0]
+                    +name)
 
 if __name__ == "__main__":
     filename = sys.argv[1]
@@ -203,4 +220,5 @@ if __name__ == "__main__":
 
     spat = SolidPatternMaker(filename, PDFPrinter())
     spat.print_pattern()
+    spat.draw_views(15)
     
