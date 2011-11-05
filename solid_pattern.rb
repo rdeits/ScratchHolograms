@@ -101,7 +101,7 @@ def DumpPatternFile( filename )
 	  	  return
 	end
 	angle_step_rad = 1 * Math::PI / 180
-	camera_angle_range = [-Math::PI/2, Math::PI/2]
+	camera_angle_range = [-Math::PI/3, Math::PI/3]
 	sweep_angle_range = [0, Math::PI * 2]
 	num_camera_steps = (camera_angle_range[1] - camera_angle_range[0]) / angle_step_rad
 	num_sweep_steps = (sweep_angle_range[1] - sweep_angle_range[0]) / angle_step_rad

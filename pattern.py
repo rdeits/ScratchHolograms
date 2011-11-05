@@ -176,7 +176,9 @@ class SolidPatternMaker(PatternMaker):
         y = point[1]
         z = point[2]
         angle = point[3] + np.pi / 2
-        angle_delta = 2 * np.pi / 180
+        angle_delta = 1 * np.pi / 180
+        # self.printer.draw_arc([y, z], -x)
+        # self.printer.draw_line([y, z], 5, angle)
         self.printer.draw_arc([y, z + x], -x,
                               angles = [angle-angle_delta, 
                                         angle+angle_delta])

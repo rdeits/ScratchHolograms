@@ -1,6 +1,4 @@
 Display/
 *.bbprojectd
-models/
-pdf/
 *.pyc
 doc/
