@@ -81,7 +81,6 @@ class PatternMaker:
                     +name)
 
     def draw_views(self, angle):
-        angle = angle * np.pi / 180
         if isinstance(self.printer, DXFPrinter):
             print "DXFPrinter can't draw perspective views, aborting"
             return
