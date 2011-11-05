@@ -219,7 +219,6 @@ if __name__ == "__main__":
 
     spat = SolidPatternMaker(filename, PDFPrinter())
     spat.print_pattern()
-    spat.draw_view(-45*np.pi/180, '_left')
-    spat.draw_view(-25*np.pi/180, '_middle')
-    spat.draw_view(-5*np.pi/180, '_right')
+    spat.draw_view(-25*np.pi/180, '_left')
+    spat.draw_view(25*np.pi/180, '_right')
     

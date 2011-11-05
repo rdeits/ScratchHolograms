@@ -19,7 +19,7 @@ def dumpVertex( vert, trans )
 												   @rot_axis_vector,
 												   @angle_step_rad)
   (1..num_angle_steps).each do |i|
-	  intersect = $model.raytest([pos, ray_vector])
+	  intersect = @model.raytest([pos, ray_vector])
 	  angle = view_angle_range[0] + (i-1) * @angle_step_rad
 	  # if intersect
 	  #     puts "from"
@@ -30,24 +30,24 @@ def dumpVertex( vert, trans )
 	  #     puts intersect[0]
 	  # end
 	  if (!intersect) and (!arc_on)
-		  puts "turning arc on at"
-		  puts ray_vector
+		  # puts "turning arc on at"
+		  # puts ray_vector
 		  @file.write "%.3f,%.3f,%.3f,%3f," % [pos[0],
 			  pos[1],
 			  pos[2],
 			  angle]
 		  arc_on = true
 	  elsif (intersect) and (arc_on)
-		  puts "turning arc off at"
-		  puts ray_vector
+		  # puts "turning arc off at"
+		  # puts ray_vector
 		  @file.write "%.3f\n" % [angle - @angle_step_rad]
 		  arc_on = false
 	  end
 	  ray_vector = sweep_step_xform * ray_vector
   end
   if arc_on
-	  puts "turning arc off at"
-	  puts ray_vector
+	  # puts "turning arc off at"
+	  # puts ray_vector
 	  arc_on = false
 	  @file.write "%.3f\n" % view_angle_range[1]
   end
@@ -70,6 +70,19 @@ end
 
 #--------------------------------------------------------------------------
 def collectEdge( edge )
+	num_segments = (edge.length / @interpolate_step).to_i
+	puts "num_segments"
+	puts num_segments
+	if num_segments > 1
+		(1..(num_segments-1)).each do |i|
+			remaining_segments = (edge.length / @interpolate_step).to_i
+			puts "splitting at"
+			puts 1.0 - 1.0 / remaining_segments
+			new_edge = edge.split(1.0 - 1.0 / remaining_segments)
+			@edges << new_edge
+			@vertices << new_edge.end
+		end
+	end
   @edges << edge
   @vertices << edge.end
   @vertices << edge.start
@@ -117,10 +130,21 @@ def dumpEntity( entity, trans )
 end
 
 #--------------------------------------------------------------------------
-def dumpToFile( filename, what )
+def dumpToFile( filename )
+    @model=Sketchup.active_model
+    what=@model.selection
+
+    # nothing selected? Use whole model
+    if (what.count==0)
+      what = @model.entities
+    end
 	@angle_step_rad = 1 * Math::PI / 180
 	@sweep_start = Geom::Vector3d.new(1, 0, 0)
     @rot_axis_vector = Geom::Vector3d.new(0, 0, 1)
+	interpolate_resolution = 10
+	bounds = @model.bounds
+	max_bound = [bounds.width, bounds.height, bounds.depth].max
+	@interpolate_step = max_bound / interpolate_resolution
 
   @file = File.new( filename, "w" )
   if not @file
@@ -142,17 +166,10 @@ end
 
 #-----------------------------------------------------------------------------
 def dumpEdgeDataFile( filename )
-    $model=Sketchup.active_model
-    what=$model.selection
-
-    # nothing selected? Use whole model
-    if (what.count==0)
-      what = $model.entities
-    end
 
     begin
       exporter = EdgeDataExporter.new()
-      exporter.dumpToFile( filename, what )
+      exporter.dumpToFile( filename )
     rescue => bang
       print "Error: " + bang
     end
@@ -173,6 +190,7 @@ def ExportPattern()
     filename = UI.savepanel( "Export Edge Data File", nil, proposal )
 
     dumpEdgeDataFile( filename ) if filename
+	puts "done"
 end
 
 # Register within Sketchup
