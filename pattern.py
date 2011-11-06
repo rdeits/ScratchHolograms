@@ -65,9 +65,8 @@ class PatternMaker:
         self.printer.draw_arc(center = [x, y+z], r = -z, color = color)
 
     def draw_view(self, angle, name=''):
+        view_printer = PDFPrinter()
         num_points = len(self.data[:,0])
-        plt.figure(figsize=[6, 6])
-        plt.hold(True)
         for i in range(num_points):
             x = self.data[i,0]
             y = self.data[i,1]
@@ -177,16 +176,15 @@ class SolidPatternMaker(PatternMaker):
 
     def draw_view(self, angle, name=''):
         num_points = len(self.data[:,0])
-        plt.figure(figsize=[6,6])
-        plt.hold(True)
+        view_printer = PDFPrinter()
         for i in range(num_points):
             x = self.data[i,0]
             y = self.data[i,1]
             z = self.data[i,2]
             if self.data[i, 3] < angle < self.data[i,4]:
                 draw_angle = -angle + np.pi/2
-                plt.plot(y - x * np.cos(draw_angle),
-                         z + x - x * np.sin(draw_angle),
-                         'k*')
-        self.printer.save(os.path.splitext(self.filename)[0] +name)
+                view_printer.draw_point([y - x * np.cos(draw_angle),
+                         z + x - x * np.sin(draw_angle)], marker = '*', 
+                                        color = 'k')
+        view_printer.save(os.path.splitext(self.filename)[0] +name)
 

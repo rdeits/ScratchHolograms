@@ -75,7 +75,9 @@ def collectEdge( edge )
 	puts num_segments
 	if num_segments > 1
 		(1..(num_segments-1)).each do |i|
-			remaining_segments = (edge.length / @interpolate_step).to_i
+			remaining_segments = (edge.length / @interpolate_step).round
+			puts "remaining segments"
+			puts remaining_segments
 			puts "splitting at"
 			puts 1.0 - 1.0 / remaining_segments
 			new_edge = edge.split(1.0 - 1.0 / remaining_segments)

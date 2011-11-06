@@ -35,6 +35,9 @@ class PDFPrinter:
         plt.plot(center[0] + r * np.cos(angles), 
                  center[1] + r * np.sin(angles), 'k-', linewidth=.5)
 
+    def draw_point(self, center, **kwargs):
+        plt.plot(center[0], center[1], **kwargs)
+
 class DXFPrinter:
     def __init__(self):
         self.dxf = sdxf.Drawing()
