@@ -46,9 +46,11 @@ class DXFPrinter:
         self.dxf.saveas(filename+'.dxf')
 
     def draw_arc(self, center, r, angles = [np.pi/6, 5*np.pi/6], **kwargs):
+        startAngle = min(angles) * 180/np.pi
+        endAngle = max(angles) * 180/np.pi
         self.dxf.append(sdxf.Arc(center = center + [0], radius = r,
-                                startAngle = angles[0]*180/np.pi,
-                                endAngle = angles[1]*180/np.pi,
+                                startAngle = startAngle,
+                                endAngle = endAngle,
                                 layer = "drawinglayer"))
     
     def draw_line(self, center, length, angle, style='k-', **kwargs):

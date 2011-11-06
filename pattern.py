@@ -13,10 +13,10 @@ __author__ = "Robin Deits <robin.deits@gmail.com>"
 RESOLUTION = 60
 
 class PatternMaker:
-    def __init__(self, filename, printer, image_width_in = 4):
+    def __init__(self, filename, printers, image_width_in = 4):
         self.filename = filename
         self.reader = csv.reader(open(filename, 'rb'))
-        self.printer = printer
+        self.printers = printers
         self.data = np.array([[float(i) for i in row] for row in self.reader])
         print self.data
         print np.abs(self.data)
@@ -33,17 +33,17 @@ class PatternMaker:
         num_points = len(self.data[:,0])
         for i in range(num_points):
             self.plot_point(self.data[i,:])
-        self.printer.save(os.path.splitext(self.filename)[0])
+        for printer in self.printers:
+            printer.save(os.path.splitext(self.filename)[0])
 
     def plot_point(self, point):
         x = point[0]
         y = point[1]
         z = point[2]
         angles = -np.array([point[3], point[4]]) + np.pi / 2
-        self.printer.draw_arc([y, z + x], -x,
+        for printer in self.printers:
+            printer.draw_arc([y, z + x], -x,
                               angles = angles, color='k')
-        # self.printer.draw_arc([y, z+x], -x,
-        #                       angles = [angle - angle_delta, angle + angle_delta])
 
     def draw_view(self, angle, name=''):
         num_points = len(self.data[:,0])
@@ -60,17 +60,18 @@ class PatternMaker:
         view_printer.save(os.path.splitext(self.filename)[0] +name)
 
     def draw_views(self, angle):
-        if isinstance(self.printer, DXFPrinter):
-            print "DXFPrinter can't draw perspective views, aborting"
-            return
-        self.draw_view(angle, '_right')
-        self.draw_view(-angle, '_left')
+        for printer in self.printers:
+            if isinstance(printer, DXFPrinter):
+                print "DXFPrinter can't draw perspective views, aborting"
+                continue
+            self.draw_view(angle, '_right')
+            self.draw_view(-angle, '_left')
 
 class GridPatternMaker(PatternMaker):
-    def __init__(self, reader, printer, num_bins = 80, 
+    def __init__(self, reader, printers, num_bins = 80, 
                  image_width_in = 4,
                  draw_verticals = True):
-        self.setup_common(reader, printer, image_width_in)
+        self.setup_common(reader, printers, image_width_in)
 
         self.draw_verticals = draw_verticals
         self.bin_width = self.overall_range / num_bins
@@ -84,10 +85,10 @@ class GridPatternMaker(PatternMaker):
         for i in range(len(self.data[:,0])):
             self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
 
-    def setup_common(self, reader, printer, image_width_in):
+    def setup_common(self, reader, printers, image_width_in):
         self.reader = reader
         self.data = self.reader.to_array()
-        self.printer = printer
+        self.printers = printers
         self.rescale(image_width_in)
         self.filename = self.reader.filename
         z_max = np.max(np.abs(self.data[:,2]))
@@ -107,11 +108,13 @@ class GridPatternMaker(PatternMaker):
         for i in range(len(self.x_bins)):
             for j in range(len(self.y_bins)):
                 if (self.bin_angles[i][j] != np.pi/2 or self.draw_verticals):
-                    self.printer.draw_line([self.x_bins[i], 
-                                            self.y_bins[j]], 
-                                           .8*self.bin_width, 
-                                           self.bin_angles[i][j])
-        self.printer.save(os.path.splitext(self.filename)[0]+'_grid')
+                    for printer in self.printers:
+                        printer.draw_line([self.x_bins[i], 
+                                                self.y_bins[j]], 
+                                               .8*self.bin_width, 
+                                               self.bin_angles[i][j])
+        for printer in self.printers:
+            printer.save(os.path.splitext(self.filename)[0]+'_grid')
 
     def plot_point(self, x, y, z):
         print "printing:", x, y, z
@@ -131,17 +134,17 @@ class GridPatternMaker(PatternMaker):
 
 
     def draw_view(self, angle, name=''):
-        self.printer.__init__()
+        view_printer = PDFPrinter()
         for i, x in enumerate(self.x_bins):
             for j, y in enumerate(self.y_bins):
                 # self.printer.draw_circle([x,y], self.bin_width/2)
                 # plt.plot(x, y, 'k.', markersize=2)
-                self.printer.draw_line([x, y], .8*self.bin_width, self.bin_angles[i][j],
+                view_printer.draw_line([x, y], .8*self.bin_width, self.bin_angles[i][j],
                                style = 'k:', linewidth=.5)
                 if abs(angle - self.bin_angles[i][j]) < 5*np.pi/180:
-                    self.printer.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
+                    view_printer.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
                     # plt.plot(x, y, 'ko', markerfacecolor='k', markersize=20)
-        self.printer.save(os.path.splitext(self.filename)[0] + '_grid'+name)
+        view_printer.save(os.path.splitext(self.filename)[0] + '_grid'+name)
 
 def distance(p0, p1):
     return np.sqrt(np.sum(np.power(np.array(p1) - np.array(p0), 2)))
