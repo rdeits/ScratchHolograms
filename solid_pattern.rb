@@ -21,33 +21,19 @@ def dumpVertex( vert, trans )
   (1..num_angle_steps).each do |i|
 	  intersect = @model.raytest([pos, ray_vector])
 	  angle = view_angle_range[0] + (i-1) * @angle_step_rad
-	  # if intersect
-	  #     puts "from"
-	  #     puts pos
-	  #     puts "direction"
-	  #     puts ray_vector
-	  #     puts "intersect"
-	  #     puts intersect[0]
-	  # end
 	  if (!intersect) and (!arc_on)
-		  # puts "turning arc on at"
-		  # puts ray_vector
 		  @file.write "%.3f,%.3f,%.3f,%3f," % [pos[0],
 			  pos[1],
 			  pos[2],
 			  angle]
 		  arc_on = true
 	  elsif (intersect) and (arc_on)
-		  # puts "turning arc off at"
-		  # puts ray_vector
 		  @file.write "%.3f\n" % [angle - @angle_step_rad]
 		  arc_on = false
 	  end
 	  ray_vector = sweep_step_xform * ray_vector
   end
   if arc_on
-	  # puts "turning arc off at"
-	  # puts ray_vector
 	  arc_on = false
 	  @file.write "%.3f\n" % view_angle_range[1]
   end
@@ -71,15 +57,15 @@ end
 #--------------------------------------------------------------------------
 def collectEdge( edge )
 	num_segments = (edge.length / @interpolate_step).to_i
-	puts "num_segments"
-	puts num_segments
+	# puts "num_segments"
+	# puts num_segments
 	if num_segments > 1
 		(1..(num_segments-1)).each do |i|
 			remaining_segments = (edge.length / @interpolate_step).round
-			puts "remaining segments"
-			puts remaining_segments
-			puts "splitting at"
-			puts 1.0 - 1.0 / remaining_segments
+			# puts "remaining segments"
+			# puts remaining_segments
+			# puts "splitting at"
+			# puts 1.0 - 1.0 / remaining_segments
 			new_edge = edge.split(1.0 - 1.0 / remaining_segments)
 			@edges << new_edge
 			@vertices << new_edge.end
@@ -202,10 +188,10 @@ def ExportPattern()
 end
 
 # Register within Sketchup
-if(file_loaded("solid_pattern2.rb"))
+if(file_loaded("solid_pattern.rb"))
 	 menu = UI.menu("Plugins");
-	menu.add_item("Make Solid Scratch Pattern2...") { ExportPattern() }
+	menu.add_item("Make Solid Scratch Pattern...") { ExportPattern() }
 end
 
 #--------------------------------------------------------------------------
-file_loaded("solid_pattern2.rb")
+file_loaded("solid_pattern.rb")
