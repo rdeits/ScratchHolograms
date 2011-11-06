@@ -55,8 +55,7 @@ class PatternMaker:
                 # print "printing"
                 printed[i] = 1
                 self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
-        self.printer.save('./pdf/'
-                         +os.path.splitext(os.path.split(self.filename)[1])[0])
+        self.printer.save(os.path.splitext(self.filename)[0])
 
     def plot_point(self, x, y, z):
         if z < 0:
@@ -76,9 +75,7 @@ class PatternMaker:
             self.plot_point(x, y, z)
             plt.plot(x - z*np.cos(angle+np.pi/2), y + z - z*np.sin(angle+np.pi/2),
                      'k*')
-        self.printer.save('./pdf/'
-                    +os.path.splitext(os.path.split(self.filename)[1])[0]
-                    +name)
+        self.printer.save(os.path.splitext(self.filename)[0] + name)
 
     def draw_views(self, angle):
         if isinstance(self.printer, DXFPrinter):
@@ -117,8 +114,7 @@ class GridPatternMaker(PatternMaker):
                                             self.y_bins[j]], 
                                            .8*self.bin_width, 
                                            self.bin_angles[i][j])
-        self.printer.save('./pdf/'
-                +os.path.splitext(os.path.split(self.filename)[1])[0]+'_grid')
+        self.printer.save(os.path.splitext(self.filename)[0]+'_grid')
 
     def plot_point(self, x, y, z):
         print "printing:", x, y, z
@@ -148,9 +144,7 @@ class GridPatternMaker(PatternMaker):
                 if abs(angle - self.bin_angles[i][j]) < 5*np.pi/180:
                     self.printer.draw_line([x, y], self.bin_width, self.bin_angles[i][j])
                     # plt.plot(x, y, 'ko', markerfacecolor='k', markersize=20)
-        self.printer.save('./pdf/'
-                    +os.path.splitext(os.path.split(self.filename)[1])[0]
-                    +'_grid'+name)
+        self.printer.save(os.path.splitext(self.filename)[0] + '_grid'+name)
 
 def distance(p0, p1):
     return np.sqrt(np.sum(np.power(np.array(p1) - np.array(p0), 2)))
@@ -169,8 +163,7 @@ class SolidPatternMaker(PatternMaker):
         num_points = len(self.data[:,0])
         for i in range(num_points):
             self.plot_point(self.data[i,:])
-        self.printer.save('./pdf/'
-                          +os.path.splitext(os.path.split(self.filename)[1])[0])
+        self.printer.save(os.path.splitext(self.filename)[0])
 
     def plot_point(self, point):
         x = point[0]
@@ -195,7 +188,5 @@ class SolidPatternMaker(PatternMaker):
                 plt.plot(y - x * np.cos(draw_angle),
                          z + x - x * np.sin(draw_angle),
                          'k*')
-        self.printer.save('./pdf/'
-                    +os.path.splitext(os.path.split(self.filename)[1])[0]
-                    +name)
+        self.printer.save(os.path.splitext(self.filename)[0] +name)
 
