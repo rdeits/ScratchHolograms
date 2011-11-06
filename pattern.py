@@ -14,12 +14,14 @@ RESOLUTION = 60
 
 class PatternMaker:
     def __init__(self, filename, printers, image_width_in = 4):
+        self.setup_common(filename, printers, image_width_in)
+
+    def setup_common(self, filename, printers, image_width_in):
         self.filename = filename
         self.reader = csv.reader(open(filename, 'rb'))
         self.printers = printers
         self.data = np.array([[float(i) for i in row] for row in self.reader])
         print self.data
-        print np.abs(self.data)
         self.rescale(image_width_in)
 
     def rescale(self, image_width_in):
@@ -68,12 +70,20 @@ class PatternMaker:
             self.draw_view(-angle, '_left')
 
 class GridPatternMaker(PatternMaker):
-    def __init__(self, reader, printers, num_bins = 80, 
+    def __init__(self, filename, printers, num_bins = 80, 
                  image_width_in = 4,
                  draw_verticals = True):
+        self.draw_verticals = draw_verticals
         self.setup_common(reader, printers, image_width_in)
 
-        self.draw_verticals = draw_verticals
+        z_max = np.max(np.abs(self.data[:,2]))
+        self.x_range = (np.max(self.data[:,0]) 
+                - np.min(self.data[:,0]) 
+                + 2*z_max)
+        self.y_range = (np.max(self.data[:,1]) 
+                - np.min(self.data[:,1])
+                + 2*z_max)
+        self.overall_range = max(self.x_range, self.y_range)
         self.bin_width = self.overall_range / num_bins
         x_min = min(self.data[:,0]) - z_max/2
         x_max = max(self.data[:,0]) + z_max/2
@@ -84,21 +94,6 @@ class GridPatternMaker(PatternMaker):
         self.bin_angles = np.zeros((len(self.x_bins), len(self.y_bins))) + np.pi/2
         for i in range(len(self.data[:,0])):
             self.plot_point(self.data[i, 0], self.data[i, 1], self.data[i, 2])
-
-    def setup_common(self, reader, printers, image_width_in):
-        self.reader = reader
-        self.data = self.reader.to_array()
-        self.printers = printers
-        self.rescale(image_width_in)
-        self.filename = self.reader.filename
-        z_max = np.max(np.abs(self.data[:,2]))
-        self.x_range = (np.max(self.data[:,0]) 
-                - np.min(self.data[:,0]) 
-                + 2*z_max)
-        self.y_range = (np.max(self.data[:,1]) 
-                - np.min(self.data[:,1])
-                + 2*z_max)
-        self.overall_range = max(self.x_range, self.y_range)
 
     def print_pattern(self):
         r = self.bin_width / 2
