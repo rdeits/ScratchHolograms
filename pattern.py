@@ -199,26 +199,3 @@ class SolidPatternMaker(PatternMaker):
                     +os.path.splitext(os.path.split(self.filename)[1])[0]
                     +name)
 
-if __name__ == "__main__":
-    filename = sys.argv[1]
-    print filename
-    # pat = PatternMaker(VertexReader(filename), PDFPrinter())
-    # pat.print_pattern()
-    # pat.draw_views(10*np.pi/180)
-
-    # gpat = GridPatternMaker(VertexReader(filename), PDFPrinter(), num_bins = 20)
-    # gpat.print_pattern()
-    # gpat.draw_views(10*np.pi/180)
-
-    # dpat = PatternMaker(VertexReader(filename), DXFPrinter())
-    # dpat.print_pattern()
-
-    # gdpat = GridPatternMaker(VertexReader(filename), DXFPrinter(), num_bins = 100,
-    #                          draw_verticals = False) 
-    # gdpat.print_pattern()
-
-    spat = SolidPatternMaker(filename, PDFPrinter())
-    spat.print_pattern()
-    spat.draw_view(-25*np.pi/180, '_left')
-    spat.draw_view(25*np.pi/180, '_right')
-    

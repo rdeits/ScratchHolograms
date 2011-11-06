@@ -190,7 +190,13 @@ def ExportPattern()
     filename = UI.savepanel( "Export Edge Data File", nil, proposal )
 
     dumpEdgeDataFile( filename ) if filename
-	puts "done"
+	puts "Finished exporting vertex data."
+	puts "Running python script..."
+	base_dir = File.dirname(Sketchup.active_model.path)
+	python_dir = "/Users/robindeits/Projects/ScratchHolograms"
+	Dir.chdir(python_dir)
+	d = IO.popen("/usr/local/bin/python draw_pattern.py " + base_dir + "/" + proposal)
+	puts "Done. Python results will appear as soon as they are completed"
 end
 
 # Register within Sketchup
