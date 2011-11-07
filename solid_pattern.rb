@@ -30,15 +30,27 @@ PYTHON_PATH = "/usr/local/bin/python"
 class EdgeDataExporter
 #--------------------------------------------------------------------------
 def dumpVertex( vert, trans )
-
   if (trans)
     pos = trans * vert.position
   else
     pos = vert.position
   end
+  # if @last_plotted_point
+  #     if @last_plotted_point.distance(pos) < @min_separation
+  #         return
+  #     end
+  # end
+  # @last_plotted_point = pos
+  @plotted_points.each do |point|
+	  if pos.distance(point) < @min_separation
+		  return
+	  end
+  end
+  @plotted_points.insert(pos)
   arc_on = false
   view_angle_range = [-Math::PI / 3, Math::PI / 3]
-  sweep_start = @camera.eye - pos
+  # sweep_start = @camera.eye - pos
+  sweep_start = @camera.zaxis.reverse 
   num_angle_steps = (view_angle_range[1] - view_angle_range[0]) / @angle_step_rad
   ray_vector = Geom::Transformation.rotation(pos,
 											 @rot_axis_vector,
@@ -113,6 +125,7 @@ end
 
 #--------------------------------------------------------------------------
 def DumpGroup( entity, etrans, trans, name )
+	@plotted_points = Set.new()
   subtrans = combineTransformation( trans, etrans )
 
   @edges = []
@@ -160,11 +173,15 @@ def dumpToFile( filename )
 	@z_offset = @camera.eye.vector_to(origin.project_to_line([@camera.eye, @camera.direction])).length
 	@angle_step_rad = 1 * Math::PI / 180
 	@rot_axis_vector = @camera.yaxis
+	@plotted_points = Set.new()
     # @rot_axis_vector = Geom::Vector3d.new(0,0,1)
-	interpolate_resolution = 10
+	min_resolution = 10
+	max_resolution = 50
 	bounds = @model.bounds
 	max_bound = [bounds.width, bounds.height, bounds.depth].max
-	@interpolate_step = max_bound / interpolate_resolution
+	@interpolate_step = max_bound / min_resolution
+	@min_separation = max_bound / max_resolution
+	# @last_plotted_point = nil
 
   @file = File.new( filename, "w" )
   if not @file
@@ -174,9 +191,6 @@ def dumpToFile( filename )
 
   begin
     what.each{ |entity| dumpEntity( entity, nil ) }
-  rescue StandardError => bang
-    @file.write "\nClosed due to error: " + bang
-    raise
   ensure
     @file.close
   end
@@ -208,6 +222,9 @@ def ExportPattern()
     end
 
     filename = UI.savepanel( "Export Edge Data File", nil, proposal )
+	if !proposal
+		return
+	end
 
     dumpEdgeDataFile( filename ) if filename
 	puts "Finished exporting vertex data."

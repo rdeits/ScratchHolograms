@@ -10,7 +10,7 @@ generate a hologram of the model.
 Requirements:
 =============
 python 2.6 or 2.7 with Matplotlib and Numpy
-Google SketchUp
+Google SketchUp (tested on version 8)
 
 =============
 Installation:
