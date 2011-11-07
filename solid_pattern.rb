@@ -48,19 +48,19 @@ def dumpVertex( vert, trans )
   end
   @plotted_points.insert(pos)
   arc_on = false
-  view_angle_range = [-Math::PI / 3, Math::PI / 3]
   # sweep_start = @camera.eye - pos
-  sweep_start = @camera.zaxis.reverse 
-  num_angle_steps = (view_angle_range[1] - view_angle_range[0]) / @angle_step_rad
-  ray_vector = Geom::Transformation.rotation(pos,
-											 @rot_axis_vector,
-											 view_angle_range[0]) * sweep_start
-  sweep_step_xform = Geom::Transformation.rotation(pos,
-												   @rot_axis_vector,
-												   @angle_step_rad)
-  (1..num_angle_steps).each do |i|
-	  intersect = @model.raytest([pos, ray_vector])
-	  angle = view_angle_range[0] + (i-1) * @angle_step_rad
+  # sweep_start = @camera.zaxis.reverse 
+  # ray_vector = Geom::Transformation.rotation(pos,
+  #                                            @rot_axis_vector,
+  #                                            @view_angle_range[0]) * sweep_start
+  # sweep_step_xform = Geom::Transformation.rotation(pos,
+  #                                                  @rot_axis_vector,
+  #                                                  @angle_step_rad)
+
+  view_pos = @view_start_pos
+  (1..@num_angle_steps).each do |i|
+	  intersect = @model.raytest([pos, pos.vector_to(view_pos)])
+	  angle = @view_angle_range[0] + (i-1) * @angle_step_rad
 	  if (!intersect) and (!arc_on)
 		  @file.write "%.3f,%.3f,%.3f,%3f," % [
 			  @camera.eye.vector_to(pos).dot(@camera.xaxis),
@@ -72,11 +72,11 @@ def dumpVertex( vert, trans )
 		  @file.write "%.3f\n" % [angle - @angle_step_rad]
 		  arc_on = false
 	  end
-	  ray_vector = sweep_step_xform * ray_vector
+	  view_pos = @view_step_xform * view_pos
   end
   if arc_on
 	  arc_on = false
-	  @file.write "%.3f\n" % view_angle_range[1]
+	  @file.write "%.3f\n" % (@view_angle_range[1])
   end
 end
 
@@ -172,7 +172,17 @@ def dumpToFile( filename )
 	origin = Geom::Point3d.new(0,0,0)
 	@z_offset = @camera.eye.vector_to(origin.project_to_line([@camera.eye, @camera.direction])).length
 	@angle_step_rad = 1 * Math::PI / 180
-	@rot_axis_vector = @camera.yaxis
+	rot_axis_vector = @camera.yaxis
+    @view_angle_range = [-Math::PI / 3, Math::PI / 3]
+    @num_angle_steps = (@view_angle_range[1] - @view_angle_range[0]) / @angle_step_rad
+	view_rot_center = origin.project_to_line([@camera.eye, @camera.direction]) 
+    @view_step_xform = Geom::Transformation.rotation(view_rot_center,
+													 rot_axis_vector,
+													@angle_step_rad)
+	@view_start_pos = Geom::Transformation.rotation(view_rot_center,
+													rot_axis_vector,
+													@view_angle_range[0]) * @camera.eye
+	
 	@plotted_points = Set.new()
     # @rot_axis_vector = Geom::Vector3d.new(0,0,1)
 	min_resolution = 10
@@ -189,11 +199,11 @@ def dumpToFile( filename )
           return
   end
 
-  begin
+  # begin
     what.each{ |entity| dumpEntity( entity, nil ) }
-  ensure
+  # ensure
     @file.close
-  end
+  # end
 end
 
 end
