@@ -38,7 +38,7 @@ def dumpVertex( vert, trans )
   end
   arc_on = false
   view_angle_range = [-Math::PI / 3, Math::PI / 3]
-  sweep_start = @camera_pos - pos
+  sweep_start = @camera.eye - pos
   num_angle_steps = (view_angle_range[1] - view_angle_range[0]) / @angle_step_rad
   ray_vector = Geom::Transformation.rotation(pos,
 											 @rot_axis_vector,
@@ -50,9 +50,10 @@ def dumpVertex( vert, trans )
 	  intersect = @model.raytest([pos, ray_vector])
 	  angle = view_angle_range[0] + (i-1) * @angle_step_rad
 	  if (!intersect) and (!arc_on)
-		  @file.write "%.3f,%.3f,%.3f,%3f," % [pos[0],
-			  pos[1],
-			  pos[2],
+		  @file.write "%.3f,%.3f,%.3f,%3f," % [
+			  @camera.eye.vector_to(pos).dot(@camera.xaxis),
+			  @camera.eye.vector_to(pos).dot(@camera.yaxis),
+			  @camera.eye.vector_to(pos).dot(@camera.zaxis.reverse)+@z_offset,
 			  angle]
 		  arc_on = true
 	  elsif (intersect) and (arc_on)
@@ -154,9 +155,12 @@ def dumpToFile( filename )
     if (what.count==0)
       what = @model.entities
     end
-	@camera_pos = @model.active_view.camera.eye
+	@camera = @model.active_view.camera
+	origin = Geom::Point3d.new(0,0,0)
+	@z_offset = @camera.eye.vector_to(origin.project_to_line([@camera.eye, @camera.direction])).length
 	@angle_step_rad = 1 * Math::PI / 180
-    @rot_axis_vector = Geom::Vector3d.new(0, 0, 1)
+	@rot_axis_vector = @camera.yaxis
+    # @rot_axis_vector = Geom::Vector3d.new(0,0,1)
 	interpolate_resolution = 10
 	bounds = @model.bounds
 	max_bound = [bounds.width, bounds.height, bounds.depth].max

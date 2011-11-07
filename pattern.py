@@ -1,6 +1,5 @@
 from __future__ import division
 import numpy as np
-from vertex import VertexReader
 from printer import PDFPrinter, DXFPrinter
 import random
 import sys
@@ -44,7 +43,7 @@ class PatternMaker:
         z = point[2]
         angles = -np.array([point[3], point[4]]) + np.pi / 2
         for printer in self.printers:
-            printer.draw_arc([y, z + x], -x,
+            printer.draw_arc([x, y + z], -z,
                               angles = angles, color='k')
 
     def draw_view(self, angle):
@@ -56,8 +55,8 @@ class PatternMaker:
             z = self.data[i,2]
             if self.data[i, 3] < angle < self.data[i,4]:
                 draw_angle = -angle + np.pi/2
-                view_printer.draw_point([y - x * np.cos(draw_angle),
-                         z + x - x * np.sin(draw_angle)], marker = '*', 
+                view_printer.draw_point([x - z * np.cos(draw_angle),
+                         y + z - z * np.sin(draw_angle)], marker = '*', 
                                         color = 'k')
         view_printer.save(os.path.splitext(self.filename)[0] 
                           + "_view_" + ("%+3d" %(angle * 180/np.pi)).strip())
