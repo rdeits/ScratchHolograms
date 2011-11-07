@@ -3,6 +3,30 @@ require 'sketchup.rb'
 SCRIPTS_DIR = "/Users/robindeits/Projects/ScratchHolograms"
 PYTHON_PATH = "/usr/local/bin/python"
 
+###########################################################
+#
+#    This program is based heavily on the dataexporter plugin
+#    http://modelisation.nancy.archi.fr/rld/plugin_details.php?id=101
+#
+#    Which was distributed with the following copyright information:
+#
+#    Copyright (C) 2008 Uli Tessel (utessel@gmx.de)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+###########################################################
+
 class EdgeDataExporter
 #--------------------------------------------------------------------------
 def dumpVertex( vert, trans )
