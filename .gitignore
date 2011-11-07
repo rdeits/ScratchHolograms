@@ -2,3 +2,4 @@ Display/
 *.bbprojectd
 *.pyc
 doc/
+Unused_models/
