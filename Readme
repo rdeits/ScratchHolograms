@@ -29,12 +29,13 @@ OS X).
 =============
 Usage:
 =============
-Create a new model in SketchUp (or open up one of the samples provided with this
-distribution), and save it somewhere convenient. Then click Plugins -> Make
-Solid Scratch Pattern... and save the *.pattern file IN THE SAME DIRECTORY as
-the *.skp file (the SketchUp model itself). Shortly thereafter, the printable
+Create a new model in SketchUp (or open up one of the samples provided with
+this distribution), and save it somewhere convenient. Then click Plugins ->
+Make Solid Scratch Pattern... and save the *.pattern file in whatever folder
+you want the pattern files to appear in. Shortly thereafter, the printable
 pattern file (.pdf), the drawing file for CNC milling (.dxf), and simulated
-views at two viewing angles (_view_+5.pdf, etc.) will appear in the same folder. 
+views at two viewing angles (_view_+5.pdf, etc.) will appear in the same
+folder. 
 
 A few notes on usage:
 The X and Y coordinates of the generated hologram correspond entirely to the

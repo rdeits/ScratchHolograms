@@ -20,7 +20,7 @@ class PatternMaker:
         self.reader = csv.reader(open(filename, 'rb'))
         self.printers = printers
         self.data = np.array([[float(i) for i in row] for row in self.reader])
-        print self.data
+        # print self.data
         self.rescale(image_width_in)
 
     def rescale(self, image_width_in):

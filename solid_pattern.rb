@@ -212,11 +212,14 @@ def ExportPattern()
     dumpEdgeDataFile( filename ) if filename
 	puts "Finished exporting vertex data."
 	puts "Running python script..."
-	base_dir = File.dirname(Sketchup.active_model.path)
+	base_dir = File.dirname(filename)
 	scripts_dir = SCRIPTS_DIR
 	Dir.chdir(scripts_dir)
 	d = IO.popen(PYTHON_PATH + " draw_pattern.py " + base_dir + "/" + proposal)
-	puts "Done. Python results will appear as soon as they are completed"
+	puts "Data export done. Python results will appear as soon as they are completed"
+	while d.gets != nil
+		puts d.gets
+	end
 end
 
 # Register within Sketchup
