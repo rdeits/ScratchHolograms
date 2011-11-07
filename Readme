@@ -37,8 +37,11 @@ pattern file (.pdf), the drawing file for CNC milling (.dxf), and simulated
 views at two viewing angles (_view_+5.pdf, etc.) will appear in the same folder. 
 
 A few notes on usage:
-The 'depth' of the hologram is assumed to be along the x-axis of the SketchUp
-model (negative x values are below the page, positive values are above it). The
-initial viewing angle is pointed towards the current camera position (so moving
-the camera viewpoint affects the generated hologram). 
+The X and Y coordinates of the generated hologram correspond entirely to the
+camera's X and Y axes, and the Z coordinate is the depth relative to the
+projection of the origin onto the line of view.  This means that an object
+centered on the origin will have a hologram of points elements with positive
+and negative z values, while an object on the opposite side of the origin from
+the camera will have entirely negative z values (and thus be entirely below the
+page when the hologram is viewed)
 
