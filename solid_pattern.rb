@@ -11,10 +11,11 @@ def dumpVertex( vert, trans )
   end
   arc_on = false
   view_angle_range = [-Math::PI / 3, Math::PI / 3]
+  sweep_start = @camera_pos - pos
   num_angle_steps = (view_angle_range[1] - view_angle_range[0]) / @angle_step_rad
   ray_vector = Geom::Transformation.rotation(pos,
 											 @rot_axis_vector,
-											 view_angle_range[0]) * @sweep_start
+											 view_angle_range[0]) * sweep_start
   sweep_step_xform = Geom::Transformation.rotation(pos,
 												   @rot_axis_vector,
 												   @angle_step_rad)
@@ -126,8 +127,8 @@ def dumpToFile( filename )
     if (what.count==0)
       what = @model.entities
     end
+	@camera_pos = @model.active_view.camera.eye
 	@angle_step_rad = 1 * Math::PI / 180
-	@sweep_start = Geom::Vector3d.new(1, 0, 0)
     @rot_axis_vector = Geom::Vector3d.new(0, 0, 1)
 	interpolate_resolution = 10
 	bounds = @model.bounds
