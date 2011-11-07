@@ -1,0 +1,44 @@
+=============
+About:
+=============
+This is a program designed to make it easier to create scratch holograms (see
+http://www.eskimo.com/~billb/amateur/holo1.html). It allows the user to create a
+3D model in Google SketchUp, and then convert that model into a pattern to
+generate a hologram of the model. 
+
+=============
+Requirements:
+=============
+python 2.6 or 2.7 with Matplotlib and Numpy
+Google SketchUp
+
+=============
+Installation:
+=============
+Currently, this is only tested on OS X 10.6 and 10.7. It can probably be made to
+work on other systems relatively easily, but I haven't done so yet. 
+
+Install SDXF from http://www.kellbot.com/sdxf-python-library-for-dxf/
+
+Open up solid_pattern.rb: change the value of SCRIPTS_DIR to point to the
+location of this Readme file, and change PYTHON_PATH to point to your python
+executable. Next, copy (or symlink) solid_pattern.rb to your Google Sketchup Plugins
+folder (/Library/Application\ Support/Google\ SketchUp\ 8/SketchUp/plugins/ on
+OS X). 
+
+=============
+Usage:
+=============
+Create a new model in SketchUp (or open up one of the samples provided with this
+distribution), and save it somewhere convenient. Then click Plugins -> Make
+Solid Scratch Pattern... and save the *.pattern file IN THE SAME DIRECTORY as
+the *.skp file (the SketchUp model itself). Shortly thereafter, the printable
+pattern file (.pdf), the drawing file for CNC milling (.dxf), and simulated
+views at two viewing angles (_view_+5.pdf, etc.) will appear in the same folder. 
+
+A few notes on usage:
+The 'depth' of the hologram is assumed to be along the x-axis of the SketchUp
+model (negative x values are below the page, positive values are above it). The
+initial viewing angle is pointed towards the current camera position (so moving
+the camera viewpoint affects the generated hologram). 
+

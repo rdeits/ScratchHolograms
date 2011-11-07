@@ -1,5 +1,8 @@
 require 'sketchup.rb'
 
+SCRIPTS_DIR = "/Users/robindeits/Projects/ScratchHolograms"
+PYTHON_PATH = "/usr/local/bin/python"
+
 class EdgeDataExporter
 #--------------------------------------------------------------------------
 def dumpVertex( vert, trans )
@@ -182,9 +185,9 @@ def ExportPattern()
 	puts "Finished exporting vertex data."
 	puts "Running python script..."
 	base_dir = File.dirname(Sketchup.active_model.path)
-	python_dir = "/Users/robindeits/Projects/ScratchHolograms"
-	Dir.chdir(python_dir)
-	d = IO.popen("/usr/local/bin/python draw_pattern.py " + base_dir + "/" + proposal)
+	scripts_dir = SCRIPTS_DIR
+	Dir.chdir(scripts_dir)
+	d = IO.popen(PYTHON_PATH + " draw_pattern.py " + base_dir + "/" + proposal)
 	puts "Done. Python results will appear as soon as they are completed"
 end
 
