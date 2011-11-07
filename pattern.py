@@ -47,7 +47,7 @@ class PatternMaker:
             printer.draw_arc([y, z + x], -x,
                               angles = angles, color='k')
 
-    def draw_view(self, angle, name=''):
+    def draw_view(self, angle):
         num_points = len(self.data[:,0])
         view_printer = PDFPrinter()
         for i in range(num_points):
@@ -59,15 +59,16 @@ class PatternMaker:
                 view_printer.draw_point([y - x * np.cos(draw_angle),
                          z + x - x * np.sin(draw_angle)], marker = '*', 
                                         color = 'k')
-        view_printer.save(os.path.splitext(self.filename)[0] +name)
+        view_printer.save(os.path.splitext(self.filename)[0] 
+                          + "_view_" + ("%+3d" %(angle * 180/np.pi)).strip())
 
     def draw_views(self, angle):
         for printer in self.printers:
             if isinstance(printer, DXFPrinter):
                 print "DXFPrinter can't draw perspective views, aborting"
                 continue
-            self.draw_view(angle, '_right')
-            self.draw_view(-angle, '_left')
+            self.draw_view(angle)
+            self.draw_view(-angle)
 
 class GridPatternMaker(PatternMaker):
     def __init__(self, filename, printers, num_bins = 80, 

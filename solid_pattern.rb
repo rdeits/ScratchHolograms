@@ -57,12 +57,12 @@ end
 
 #--------------------------------------------------------------------------
 def collectEdge( edge )
-	num_segments = (edge.length / @interpolate_step).to_i
+	num_segments = (edge.length / @interpolate_step).round
 	# puts "num_segments"
 	# puts num_segments
 	if num_segments > 1
 		(1..(num_segments-1)).each do |i|
-			remaining_segments = (edge.length / @interpolate_step).round
+			remaining_segments = (edge.length / @interpolate_step)
 			# puts "remaining segments"
 			# puts remaining_segments
 			# puts "splitting at"

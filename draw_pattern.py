@@ -9,6 +9,6 @@ print "2"
 filename = sys.argv[1]
 pat = PatternMaker(filename, [PDFPrinter(), DXFPrinter()])
 pat.print_pattern()
-pat.draw_view(-25*np.pi/180, '_left')
-pat.draw_view(25*np.pi/180, '_right')
+pat.draw_view(-5*np.pi/180)
+pat.draw_view(5*np.pi/180)
 print "done"
