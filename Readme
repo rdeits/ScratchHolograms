@@ -21,10 +21,10 @@ work on other systems relatively easily, but I haven't done so yet.
 Install SDXF from http://www.kellbot.com/sdxf-python-library-for-dxf/
 
 Open up solid_pattern.rb: change the value of SCRIPTS_DIR to point to the
-location of this Readme file, and change PYTHON_PATH to point to your python
-executable. Next, copy (or symlink) solid_pattern.rb to your Google Sketchup Plugins
-folder (/Library/Application\ Support/Google\ SketchUp\ 8/SketchUp/plugins/ on
-OS X). 
+directory containing draw_pattern.py, and change PYTHON_PATH to point to your
+python executable. Next, copy (or symlink) solid_pattern.rb to your Google
+Sketchup Plugins folder (/Library/Application\ Support/Google\ SketchUp\
+8/SketchUp/plugins/ on OS X). 
 
 =============
 Usage:
@@ -38,11 +38,8 @@ views at two viewing angles (_view_+5.pdf, etc.) will appear in the same
 folder. 
 
 A few notes on usage:
-The X and Y coordinates of the generated hologram correspond entirely to the
-camera's X and Y axes, and the Z coordinate is the depth relative to the
-projection of the origin onto the line of view.  This means that an object
-centered on the origin will have a hologram of points elements with positive
-and negative z values, while an object on the opposite side of the origin from
-the camera will have entirely negative z values (and thus be entirely below the
-page when the hologram is viewed)
-
+The X and Y coordinates of the generated hologram correspond to the Y and Z
+axes, respectively, of the SketchUp model, and the depth of the hologram
+corresponds to the X axis of the model. A SketchUp model which is entirely in
+the X<0 region will form a hologram below the surface of the material, while a
+model in the X>0 region will form a hologram above the surface. 
