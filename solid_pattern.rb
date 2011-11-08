@@ -68,12 +68,12 @@ def dumpVertex( vert, trans )
   view_pos = @view_start_pos
   (1..@num_angle_steps).each do |i|
 	  intersect = @model.raytest([pos, pos.vector_to(view_pos)])
-	  angle = Math.atan2(view_pos.x - pos.x, view_pos.z - pos.z)
+	  angle = Math.atan2(view_pos.y - pos.y, view_pos.x - pos.x)
 	  if (!intersect) and (!arc_on)
 		  @file.write "%.3f,%.3f,%.3f,%3f," % [
-			  pos.x,
 			  pos.y,
 			  pos.z,
+			  pos.x,
 			  angle]
 		  arc_on = true
 	  elsif (intersect) and (arc_on)
@@ -84,7 +84,7 @@ def dumpVertex( vert, trans )
   end
   if arc_on
 	  arc_on = false
-	  @file.write "%.3f\n" % (Math.atan2(view_pos.x - pos.x, view_pos.z - pos.z))
+	  @file.write "%.3f\n" % (Math.atan2(view_pos.y - pos.y, view_pos.x - pos.x))
   end
 end
 
@@ -179,7 +179,7 @@ def dumpToFile( filename )
 	@camera = @model.active_view.camera
 	origin = Geom::Point3d.new(0,0,0)
 	@angle_step_rad = 1 * Math::PI / 180
-	rot_axis_vector = Geom::Vector3d.new(0, 1, 0)
+	rot_axis_vector = Geom::Vector3d.new(0, 0, 1)
     @view_angle_range = [-Math::PI / 3, Math::PI / 3]
     @num_angle_steps = (@view_angle_range[1] - @view_angle_range[0]) / @angle_step_rad
 	# view_rot_center = origin.project_to_line([@camera.eye, @camera.direction]) 
@@ -195,7 +195,7 @@ def dumpToFile( filename )
 	bounds = @model.bounds
 	model_size = [bounds.width, bounds.height, bounds.depth].max
 	view_radius = VIEWING_HEIGHT_IN / IMAGE_SIZE_IN * model_size
-	@view_start_pos = Geom::Point3d.new(0, 0, view_radius).transform(
+	@view_start_pos = Geom::Point3d.new(view_radius, 0, 0).transform(
 		Geom::Transformation.rotation(origin,
 									  rot_axis_vector,
 									  @view_angle_range[0]))
@@ -241,7 +241,7 @@ def ExportPattern()
     end
 
     filename = UI.savepanel( "Export Edge Data File", nil, proposal )
-	if !proposal
+	if !filename
 		return
 	end
 
