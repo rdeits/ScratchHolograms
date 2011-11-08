@@ -12,16 +12,19 @@ __author__ = "Robin Deits <robin.deits@gmail.com>"
 RESOLUTION = 60
 
 class PatternMaker:
-    def __init__(self, filename, printers, image_width_in = 4):
-        self.setup_common(filename, printers, image_width_in)
+    def __init__(self, filename, printers, 
+                 image_width_in = 4, 
+                 viewing_height_in = 24):
+        self.setup_common(filename, printers, image_width_in, viewing_height_in)
 
-    def setup_common(self, filename, printers, image_width_in):
+    def setup_common(self, filename, printers, image_width_in, viewing_height_in):
         self.filename = filename
         self.reader = csv.reader(open(filename, 'rb'))
         self.printers = printers
         self.data = np.array([[float(i) for i in row] for row in self.reader])
         # print self.data
         self.rescale(image_width_in)
+        self.viewing_height_in = viewing_height_in
 
     def rescale(self, image_width_in):
         z_max = np.max(np.abs(self.data[:,2]))
@@ -44,17 +47,22 @@ class PatternMaker:
         angles = -np.array([point[3], point[4]]) + np.pi / 2
         for printer in self.printers:
             printer.draw_arc([x, y + z], -z,
-                              angles = angles, color='k')
+                              angles = angles)
 
     def draw_view(self, angle):
+        view_pos = np.array([self.viewing_height_in * np.tan(angle),
+                             0,
+                             self.viewing_height_in])
         num_points = len(self.data[:,0])
         view_printer = PDFPrinter()
         for i in range(num_points):
             x = self.data[i,0]
             y = self.data[i,1]
             z = self.data[i,2]
-            if self.data[i, 3] < angle < self.data[i,4]:
-                draw_angle = -angle + np.pi/2
+            point_angle = np.arctan((view_pos[0] - x)
+                                    / (view_pos[2] - z))
+            if self.data[i, 3] < point_angle < self.data[i,4]:
+                draw_angle = -point_angle + np.pi/2
                 view_printer.draw_point([x - z * np.cos(draw_angle),
                          y + z - z * np.sin(draw_angle)], marker = '*', 
                                         color = 'k')

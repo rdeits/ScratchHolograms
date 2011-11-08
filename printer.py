@@ -14,15 +14,24 @@ class PDFPrinter:
         plt.savefig(filename+'.pdf', bbox_inches = 'tight')
     
     def draw_arc(self, center, r, angles = [np.pi/6, 5*np.pi/6], **kwargs):
+        if r > 0:
+            color = 'b'
+        else:
+            color = 'r'
         angles = np.linspace(angles[0], angles[1])
         plt.plot(center[0] + r * np.cos(angles), center[1] + r * np.sin(angles),
                 linewidth=.5,
+                 color = color,
                 **kwargs)
-        # plt.plot(x, y+z, style, marker='*', markersize=2)
-        # plt.plot([x, x-z*np.cos(angles[0])], [y+z, y+z-z*np.sin(angles[0])],
-        #         style, linestyle=':', linewidth=.25)
-        # plt.plot([x, x-z*np.cos(angles[-1])], [y+z, y+z-z*np.sin(angles[-1])],
-        #         style, linestyle=':', linewidth=.25)
+        plt.plot([center[0],
+                  center[0] + r * np.cos(angles[0])],
+                 [center[1],
+                  center[1] + r * np.sin(angles[0])],
+                 linewidth = .5,
+                 color = color,
+                 marker = '+',
+                 markersize = 2,
+                 **kwargs)
 
     def draw_line(self, center, length, angle, style='k-', **kwargs):
         plt.plot([center[0] - length/2 * np.cos(angle),

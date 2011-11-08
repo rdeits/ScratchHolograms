@@ -3,6 +3,13 @@ require 'sketchup.rb'
 SCRIPTS_DIR = "/Users/robindeits/Projects/ScratchHolograms"
 PYTHON_PATH = "/usr/local/bin/python"
 
+MIN_RESOLUTION = 10
+MAX_RESOLUTION = 50
+
+IMAGE_SIZE_IN = 4
+VIEWING_HEIGHT_IN = 24
+
+
 ###########################################################
 #
 #    This program is based heavily on the dataexporter plugin
@@ -35,6 +42,7 @@ def dumpVertex( vert, trans )
   else
     pos = vert.position
   end
+  # puts pos
   # if @last_plotted_point
   #     if @last_plotted_point.distance(pos) < @min_separation
   #         return
@@ -60,23 +68,23 @@ def dumpVertex( vert, trans )
   view_pos = @view_start_pos
   (1..@num_angle_steps).each do |i|
 	  intersect = @model.raytest([pos, pos.vector_to(view_pos)])
-	  angle = @view_angle_range[0] + (i-1) * @angle_step_rad
+	  angle = Math.atan2(view_pos.x - pos.x, view_pos.z - pos.z)
 	  if (!intersect) and (!arc_on)
 		  @file.write "%.3f,%.3f,%.3f,%3f," % [
-			  @camera.eye.vector_to(pos).dot(@camera.xaxis),
-			  @camera.eye.vector_to(pos).dot(@camera.yaxis),
-			  @camera.eye.vector_to(pos).dot(@camera.zaxis.reverse)+@z_offset,
+			  pos.x,
+			  pos.y,
+			  pos.z,
 			  angle]
 		  arc_on = true
 	  elsif (intersect) and (arc_on)
-		  @file.write "%.3f\n" % [angle - @angle_step_rad]
+		  @file.write "%.3f\n" % (angle - @angle_step_rad)
 		  arc_on = false
 	  end
 	  view_pos = @view_step_xform * view_pos
   end
   if arc_on
 	  arc_on = false
-	  @file.write "%.3f\n" % (@view_angle_range[1])
+	  @file.write "%.3f\n" % (Math.atan2(view_pos.x - pos.x, view_pos.z - pos.z))
   end
 end
 
@@ -170,27 +178,32 @@ def dumpToFile( filename )
     end
 	@camera = @model.active_view.camera
 	origin = Geom::Point3d.new(0,0,0)
-	@z_offset = @camera.eye.vector_to(origin.project_to_line([@camera.eye, @camera.direction])).length
 	@angle_step_rad = 1 * Math::PI / 180
-	rot_axis_vector = @camera.yaxis
+	rot_axis_vector = Geom::Vector3d.new(0, 1, 0)
     @view_angle_range = [-Math::PI / 3, Math::PI / 3]
     @num_angle_steps = (@view_angle_range[1] - @view_angle_range[0]) / @angle_step_rad
-	view_rot_center = origin.project_to_line([@camera.eye, @camera.direction]) 
-    @view_step_xform = Geom::Transformation.rotation(view_rot_center,
-													 rot_axis_vector,
-													@angle_step_rad)
-	@view_start_pos = Geom::Transformation.rotation(view_rot_center,
-													rot_axis_vector,
-													@view_angle_range[0]) * @camera.eye
+	# view_rot_center = origin.project_to_line([@camera.eye, @camera.direction]) 
+    # @view_step_xform = Geom::Transformation.rotation(view_rot_center,
+	#                                                  rot_axis_vector,
+	#                                                 @angle_step_rad)
+	# @view_start_pos = Geom::Transformation.rotation(view_rot_center,
+	#                                                 rot_axis_vector,
+	#                                                 @view_angle_range[0]) * @camera.eye
 	
 	@plotted_points = Set.new()
     # @rot_axis_vector = Geom::Vector3d.new(0,0,1)
-	min_resolution = 10
-	max_resolution = 50
 	bounds = @model.bounds
-	max_bound = [bounds.width, bounds.height, bounds.depth].max
-	@interpolate_step = max_bound / min_resolution
-	@min_separation = max_bound / max_resolution
+	model_size = [bounds.width, bounds.height, bounds.depth].max
+	view_radius = VIEWING_HEIGHT_IN / IMAGE_SIZE_IN * model_size
+	@view_start_pos = Geom::Point3d.new(0, 0, view_radius).transform(
+		Geom::Transformation.rotation(origin,
+									  rot_axis_vector,
+									  @view_angle_range[0]))
+	@view_step_xform = Geom::Transformation.rotation(origin,
+													rot_axis_vector,
+													@angle_step_rad)
+	@interpolate_step = model_size / MIN_RESOLUTION
+	@min_separation = model_size / MAX_RESOLUTION
 	# @last_plotted_point = nil
 
   @file = File.new( filename, "w" )
@@ -211,12 +224,8 @@ end
 #-----------------------------------------------------------------------------
 def dumpEdgeDataFile( filename )
 
-    begin
       exporter = EdgeDataExporter.new()
       exporter.dumpToFile( filename )
-    rescue => bang
-      print "Error: " + bang
-    end
 end
 #--------------------------------------------------------------------------
 
