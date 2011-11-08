@@ -1,4 +1,3 @@
-=============
 About:
 =============
 This is a program designed to make it easier to create scratch holograms (see
@@ -6,13 +5,11 @@ http://www.eskimo.com/~billb/amateur/holo1.html). It allows the user to create a
 3D model in Google SketchUp, and then convert that model into a pattern to
 generate a hologram of the model. 
 
-=============
 Requirements:
 =============
 python 2.6 or 2.7 with Matplotlib and Numpy
 Google SketchUp (tested on version 8)
 
-=============
 Installation:
 =============
 Currently, this is only tested on OS X 10.6 and 10.7. It can probably be made to
@@ -26,7 +23,6 @@ python executable. Next, copy (or symlink) solid_pattern.rb to your Google
 Sketchup Plugins folder (/Library/Application\ Support/Google\ SketchUp\
 8/SketchUp/plugins/ on OS X). 
 
-=============
 Usage:
 =============
 Create a new model in SketchUp (or open up one of the samples provided with
