@@ -3,9 +3,6 @@ require 'sketchup.rb'
 SCRIPTS_DIR = "/Users/robindeits/Projects/ScratchHolograms"
 PYTHON_PATH = "/usr/local/bin/python"
 
-MIN_RESOLUTION = 10
-MAX_RESOLUTION = 50
-
 IMAGE_SIZE_IN = 4
 VIEWING_HEIGHT_IN = 24
 
@@ -36,19 +33,13 @@ VIEWING_HEIGHT_IN = 24
 
 class EdgeDataExporter
 #--------------------------------------------------------------------------
-def dumpVertex( vert, trans )
+def dumpPoint( point, trans )
   if (trans)
-    pos = trans * vert.position
+    pos = point.transform(trans)
   else
-    pos = vert.position
+    pos = point
   end
-  # puts pos
-  # if @last_plotted_point
-  #     if @last_plotted_point.distance(pos) < @min_separation
-  #         return
-  #     end
-  # end
-  # @last_plotted_point = pos
+
   @plotted_points.each do |point|
 	  if pos.distance(point) < @min_separation
 		  return
@@ -56,14 +47,6 @@ def dumpVertex( vert, trans )
   end
   @plotted_points.insert(pos)
   arc_on = false
-  # sweep_start = @camera.eye - pos
-  # sweep_start = @camera.zaxis.reverse 
-  # ray_vector = Geom::Transformation.rotation(pos,
-  #                                            @rot_axis_vector,
-  #                                            @view_angle_range[0]) * sweep_start
-  # sweep_step_xform = Geom::Transformation.rotation(pos,
-  #                                                  @rot_axis_vector,
-  #                                                  @angle_step_rad)
 
   view_pos = @view_start_pos
   (1..@num_angle_steps).each do |i|
@@ -106,23 +89,15 @@ end
 #--------------------------------------------------------------------------
 def collectEdge( edge )
 	num_segments = (edge.length / @interpolate_step).round
-	# puts "num_segments"
-	# puts num_segments
 	if num_segments > 1
 		(1..(num_segments-1)).each do |i|
-			remaining_segments = (edge.length / @interpolate_step)
-			# puts "remaining segments"
-			# puts remaining_segments
-			# puts "splitting at"
-			# puts 1.0 - 1.0 / remaining_segments
-			new_edge = edge.split(1.0 - 1.0 / remaining_segments)
-			@edges << new_edge
-			@vertices << new_edge.end
+			scaling = Geom::Transformation.scaling(i.to_f / num_segments)
+			@points << edge.start.position.offset(
+			  edge.start.position.vector_to(edge.end.position).transform(scaling))
 		end
 	end
-  @edges << edge
-  @vertices << edge.end
-  @vertices << edge.start
+  @points << edge.end.position
+  @points << edge.start.position
 end
 
 #--------------------------------------------------------------------------
@@ -136,16 +111,12 @@ def DumpGroup( entity, etrans, trans, name )
 	@plotted_points = Set.new()
   subtrans = combineTransformation( trans, etrans )
 
-  @edges = []
-  @vertices = []
+  @points = []
   entity.entities.each { |sub| collectEdges( sub, subtrans ) }
   
-  @vertices.uniq!
-  @edges.uniq!
+  @points.uniq!
 
-  if @edges.length>0
-    @vertices.each { |vert| dumpVertex( vert, subtrans ) }
-  end
+  @points.each { |point| dumpPoint( point, subtrans ) }
   
   entity.entities.each { |sub| dumpEntity( sub, subtrans ) }
 end
@@ -202,8 +173,8 @@ def dumpToFile( filename )
 	@view_step_xform = Geom::Transformation.rotation(origin,
 													rot_axis_vector,
 													@angle_step_rad)
-	@interpolate_step = model_size / MIN_RESOLUTION
-	@min_separation = model_size / MAX_RESOLUTION
+	@interpolate_step = model_size / $min_resolution
+	@min_separation = model_size / $max_resolution
 	# @last_plotted_point = nil
 
   @file = File.new( filename, "w" )
@@ -244,6 +215,10 @@ def ExportPattern()
 	if !filename
 		return
 	end
+	result = UI.inputbox ["Minimum resolution", 
+		"Maximum resolution"], [20, 40], "Scratch Pattern"
+	$min_resolution = result[0]
+	$max_resolution = result[1]
 
     dumpEdgeDataFile( filename ) if filename
 	puts "Finished exporting vertex data."
