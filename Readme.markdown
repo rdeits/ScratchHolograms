@@ -24,18 +24,18 @@ Sketchup Plugins folder (/Library/Application\ Support/Google\ SketchUp\
 8/SketchUp/plugins/ on OS X). 
 
 Usage:
-=============
+======
 Create a new model in SketchUp (or open up one of the samples provided with
 this distribution), and save it somewhere convenient. Then click Plugins ->
 Make Solid Scratch Pattern... and save the *.pattern file in whatever folder
 you want the pattern files to appear in. Shortly thereafter, the printable
 pattern file (.pdf), the drawing file for CNC milling (.dxf), and simulated
-views at two viewing angles (_view_+5.pdf, etc.) will appear in the same
+views at three viewing angles (_view_+5.pdf, etc.) will appear in the same
 folder. 
 
 A few notes on usage:
 The X and Y coordinates of the generated hologram correspond to the Y and Z
 axes, respectively, of the SketchUp model, and the depth of the hologram
 corresponds to the X axis of the model. A SketchUp model which is entirely in
-the X<0 region will form a hologram below the surface of the material, while a
-model in the X>0 region will form a hologram above the surface. 
+the X < 0 region will form a hologram below the surface of the material, while a
+model in the X > 0 region will form a hologram above the surface. 
