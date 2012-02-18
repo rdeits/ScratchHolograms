@@ -47,6 +47,7 @@ class PatternMaker:
         angles = -np.array([point[3], point[4]]) + np.pi / 2
         for printer in self.printers:
             printer.draw_arc([x, y + z], -z,
+            # printer.draw_arc([x, y], -z,
                               angles = angles)
 
     def draw_view(self, angle):
@@ -65,6 +66,7 @@ class PatternMaker:
                 draw_angle = -point_angle + np.pi/2
                 view_printer.draw_point([x - z * np.cos(draw_angle),
                          y + z - z * np.sin(draw_angle)], marker = '*', 
+                         # y - z * np.sin(draw_angle)], marker = '*', 
                                         color = 'k')
         view_printer.save(os.path.splitext(self.filename)[0] 
                           + "_view_" + ("%+3d" %(angle * 180/np.pi)).strip())
