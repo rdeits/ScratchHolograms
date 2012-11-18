@@ -6,6 +6,7 @@ http://www.eskimo.com/~billb/amateur/holo1.html). It allows the user to create a
 generate a hologram of the model. I've blogged about it here: 
 
 http://blog.robindeits.com/2011/09/26/scratch-holograms/
+
 http://blog.robindeits.com/2012/02/20/more-scratch-holograms/
 
 Requirements:
