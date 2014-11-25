@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import sdxf
+import os.path
 
 class PDFPrinter:
     def __init__(self):
@@ -11,8 +12,8 @@ class PDFPrinter:
     def save(self, filename):
         plt.axis('equal')
         plt.tick_params(colors='w')
-        plt.savefig(filename+'.pdf', bbox_inches = 'tight')
-    
+        plt.savefig(os.path.abspath(filename+'.pdf'), bbox_inches = 'tight')
+
     def draw_arc(self, center, r, angles = [np.pi/6, 5*np.pi/6], **kwargs):
         if r > 0:
             color = 'b'
@@ -38,10 +39,10 @@ class PDFPrinter:
                   center[0] + length/2 * np.cos(angle)],
                  [center[1] - length/2 * np.sin(angle),
                   center[1] + length/2 * np.sin(angle)], style, **kwargs)
-   
+
     def draw_circle(self, center, r):
         angles = np.linspace(0, 2*np.pi, 100)
-        plt.plot(center[0] + r * np.cos(angles), 
+        plt.plot(center[0] + r * np.cos(angles),
                  center[1] + r * np.sin(angles), 'k-', linewidth=.5)
 
     def draw_point(self, center, **kwargs):
@@ -64,7 +65,7 @@ class DXFPrinter:
                                 startAngle = startAngle,
                                 endAngle = endAngle,
                                 layer = "drawinglayer"))
-    
+
     def draw_line(self, center, length, angle, style='k-', **kwargs):
         self.dxf.append(sdxf.Line(points=
             [[center[0] - length/2 * np.cos(angle),
@@ -72,4 +73,4 @@ class DXFPrinter:
              [center[0] + length/2 * np.cos(angle),
               center[1] + length/2 * np.sin(angle)]]))
 
-        
+
